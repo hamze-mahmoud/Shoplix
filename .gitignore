@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Builds
+dist/
+dist-ssr/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Local tooling
+.claude/
+.vscode/
+.idea/
+.DS_Store
+
+# Temp / scratch
+_tmp_*
+*.local

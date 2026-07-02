@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ===== Luxury design tokens ===== */
+:root {
+  --ink: #111827;
+  --cream: #F8F9FA;
+  --sand: #E5E7EB;
+  --emerald: #16A34A;
+  --gold: #FACC15;
+}
+
+/* Distinctive editorial serif display face for headlines */
+.font-display {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+}
+[lang="ar"] .font-display { font-family: 'Noto Sans Arabic', serif; }
+[lang="he"] .font-display { font-family: 'Noto Sans Hebrew', serif; }
+
+/* Refined animated underline for links */
+.link-underline { position: relative; display: inline-block; }
+.link-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.link-underline:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* Image zoom-on-hover container */
+.img-zoom { overflow: hidden; }
+.img-zoom img { transition: transform 1.1s cubic-bezier(0.19, 1, 0.22, 1); }
+.img-zoom:hover img { transform: scale(1.06); }
+
+/* Tasteful tracking helper */
+.tracking-luxe { letter-spacing: 0.28em; }
+
+/* Hide scrollbar (used on horizontal filter rails) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ===== Animated buttons ===== */
+/* A colour panel that sweeps up from the bottom on hover. The button keeps
+   its own background; --sweep is the colour that washes over it. */
+.btn-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s cubic-bezier(0.19, 1, 0.22, 1), color 0.4s ease;
+}
+.btn-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--sweep, #16A34A);
+  transform: translateY(101%);
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.btn-sweep:hover::after { transform: translateY(0); }
+.btn-sweep:active { transform: scale(0.97); }
+
+/* Subtle press feedback for any button */
+.btn-press { transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
+.btn-press:active { transform: scale(0.95); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-sweep::after { transition: none; }
+  .img-zoom img { transition: none; }
+}
+
+/* RTL font support */
+:root {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+[lang="ar"] {
+  font-family: 'Noto Sans Arabic', 'Inter', system-ui, sans-serif;
+}
+
+[lang="he"] {
+  font-family: 'Noto Sans Hebrew', 'Inter', system-ui, sans-serif;
+}
+
+/* Smooth RTL/LTR transitions */
+html {
+  transition: none;
+}
+
+/* Logical properties fallback for older browsers */
+.start-0 { inset-inline-start: 0; }
+.end-0 { inset-inline-end: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Page transitions */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageFadeIn 0.3s ease-out;
+}
+
+/* Notification bell wiggle */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  80% { transform: rotate(4deg); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.18s ease-out;
+}
+
+/* Toast auto-dismiss progress bar (transform-origin set inline for RTL) */
+@keyframes toast-bar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
