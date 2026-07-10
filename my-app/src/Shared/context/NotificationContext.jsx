@@ -12,12 +12,14 @@ import { toastService } from "../services/toastService";
 
 import { notificationService } from "../services/notificationService";
 import { getSocket, joinUserRoom } from "../services/socket";
+import { getAccessToken } from "../services/api";
 
 const NotificationContext = createContext(null);
 
+// Reads the in-memory access token (never client storage — see api.js).
 function getUserIdFromToken() {
-  const token = localStorage.getItem("accessToken");
-  if (!token || token === "undefined") return null;
+  const token = getAccessToken();
+  if (!token) return null;
   try {
     return jwtDecode(token).id || null;
   } catch {

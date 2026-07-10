@@ -9,6 +9,7 @@ const usersCtrl = require('../controllers/users')
 const ordersCtrl = require('../controllers/orders')
 const reviewsCtrl = require('../controllers/reviews')
 const bannersCtrl = require('../controllers/banners')
+const offersCtrl = require('../controllers/offers')
 
 const { protect, admin } = require('../middleware/authMiddleware')
 
@@ -39,6 +40,8 @@ router.delete('/users/:id', usersCtrl.deleteUser)
 
 // Product management routes
 router.get('/products', productsCtrl.getAllProducts)
+// Lightweight paginated picker (bundle-offer admin) — declared before /:id-style routes
+router.get('/products/search', productsCtrl.pickerSearchProducts)
 router.post('/products', upload.any(), productsCtrl.createProduct);
 router.put('/products/:id', upload.array('images', 10), productsCtrl.updateProduct)
 router.delete('/products/:id', productsCtrl.deleteProduct)
@@ -53,6 +56,13 @@ router.get('/banners', bannersCtrl.adminGetBanners)
 router.post('/banners', upload.single('image'), bannersCtrl.createBanner)
 router.put('/banners/:id', upload.single('image'), bannersCtrl.updateBanner)
 router.delete('/banners/:id', bannersCtrl.deleteBanner)
+
+// Bundle offer management routes
+router.get('/offers', offersCtrl.adminGetOffers)
+router.get('/offers/:id', offersCtrl.adminGetOffer)
+router.post('/offers', upload.array('images', 8), offersCtrl.createOffer)
+router.put('/offers/:id', upload.array('images', 8), offersCtrl.updateOffer)
+router.delete('/offers/:id', offersCtrl.deleteOffer)
 
 // Review moderation routes
 router.get('/reviews', reviewsCtrl.adminGetReviews)

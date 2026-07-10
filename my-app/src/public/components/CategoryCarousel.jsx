@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { localized } from "../../Shared/utils/localize";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
  * images: string[]  (curated fallback imagery, cycled by index)
  */
 export default function CategoryCarousel({ categories = [], images = [], loading = false }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const railRef = useRef(null);
   const drag = useRef({ active: false, startX: 0, startLeft: 0, moved: false });
 
@@ -125,7 +126,10 @@ export default function CategoryCarousel({ categories = [], images = [], loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} data-cat-card className="shrink-0 w-[72%] sm:w-[46%] lg:w-[31%] aspect-[3/4] bg-[#E5E7EB] animate-pulse" />
             ))
-          : categories.map((cat, i) => (
+          : categories.map((cat, i) => {
+              const catName = localized(cat, "name", i18n.language) || cat.name;
+              const catDesc = localized(cat, "description", i18n.language) || cat.description;
+              return (
               <Link
                 key={cat._id}
                 to={`/categories/${cat._id}`}
@@ -137,7 +141,7 @@ export default function CategoryCarousel({ categories = [], images = [], loading
                 <div className="img-zoom relative aspect-[3/4] bg-[#E5E7EB] overflow-hidden">
                   <img
                     src={images[i % images.length]}
-                    alt={cat.name}
+                    alt={catName}
                     loading="lazy"
                     draggable={false}
                     className="w-full h-full object-cover"
@@ -161,16 +165,17 @@ export default function CategoryCarousel({ categories = [], images = [], loading
                       {t("home.collections_label")}
                     </p>
                     <h3 className="font-display text-3xl mt-1.5 leading-none flex items-center gap-2">
-                      {cat.name}
+                      {catName}
                       <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 rtl:rotate-180 transition-all duration-500" />
                     </h3>
                     <p className="mt-2 text-sm text-white/65 font-light line-clamp-1 max-w-[16rem]">
-                      {cat.description || t("categories.explore")}
+                      {catDesc || t("categories.explore")}
                     </p>
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
       </div>
 
       {/* Scroll-progress indicator */}

@@ -18,6 +18,16 @@ module.exports = async function createProduct(req, res) {
 
     const cleanDiscount = Math.min(Math.max(Number(discountPercent) || 0, 0), 90);
 
+    // "Who is this for?" tags — arrives as a JSON string (multipart) or array
+    const AUDIENCES = ["kids", "young", "women", "men", "elderly"];
+    let audienceTags = req.body.audienceTags;
+    if (typeof audienceTags === "string") {
+      try { audienceTags = JSON.parse(audienceTags); } catch { audienceTags = []; }
+    }
+    audienceTags = Array.isArray(audienceTags)
+      ? audienceTags.filter((t) => AUDIENCES.includes(t))
+      : [];
+
     // Multilingual fields → canonical name/description (search/sort/snapshots)
     const translations = parseTranslations(req.body.translations);
     const canonical = deriveCanonical(translations, { name, description });
@@ -85,6 +95,7 @@ module.exports = async function createProduct(req, res) {
       hideWhenSoldOut: hideWhenSoldOut === true || hideWhenSoldOut === "true",
       isFeatured: isFeatured === true || isFeatured === "true",
       discountPercent: cleanDiscount,
+      audienceTags,
     });
 
     await cache.delByPrefix("products:"); // invalidate product caches

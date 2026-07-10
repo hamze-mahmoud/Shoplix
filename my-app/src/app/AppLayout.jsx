@@ -23,12 +23,14 @@ export default function AppLayout() {
     getSocket();
   }, []);
 
-  // Page transition on route change
+  // Page transition on route change. clearProps removes the leftover inline
+  // transform when the tween ends — a transformed <main> silently breaks
+  // position:fixed for every descendant (e.g. ScrollTrigger pinning).
   useEffect(() => {
     if (!mainRef.current) return;
     gsap.fromTo(mainRef.current,
       { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+      { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", clearProps: "all" }
     );
   }, [location.pathname]);
 

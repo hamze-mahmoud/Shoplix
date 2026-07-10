@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../../shared/hooks/useAuth";
+import useAuth from "../../../Shared/hooks/useAuth";
+import { authService } from "../../../Shared/services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,10 +28,20 @@ export default function Login() {
       setLoading(true);
       setError("");
 
-      await login(form.email, form.password);
+      // Authenticate against the backend, then hand the verified user + token
+      // to the auth context (token → memory, refresh session → httpOnly cookie).
+      const { data } = await authService.login({
+        identifier: form.email,
+        password: form.password,
+      });
 
-      // ✅ redirect after login
-      navigate("/admin");
+      if (data.user?.role !== "admin") {
+        setError(t("admin.auth.not_admin", "This account is not an administrator."));
+        return;
+      }
+
+      login(data.user, data.accessToken);
+      navigate("/admin", { replace: true });
 
     } catch (err) {
       setError(

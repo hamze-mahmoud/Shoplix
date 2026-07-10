@@ -4,18 +4,25 @@ import { useTranslation } from "react-i18next";
 import { authService } from "../../../Shared/services/authService";
 import { AuthContext } from "../../../Shared/AuthContext";
 import { gsap } from "gsap";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import SocialAuth from "./components/SocialAuth";
+import { Phone, Lock, Eye, EyeOff } from "lucide-react";
 import AuthShell from "./components/AuthShell";
+import WhatsAppNote from "./components/WhatsAppNote";
+import OtpVerify from "./components/OtpVerify";
+import ForgotPassword from "./components/ForgotPassword";
 
 export default function Login() {
   const containerRef = useRef();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  // Set when an unverified phone account tries to sign in — switches the card
+  // to the WhatsApp code step (a fresh code is auto-sent on mount).
+  const [pendingVerify, setPendingVerify] = useState(null);
+  // Switches the card to the forgot-password flow (WhatsApp reset code).
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,8 +47,11 @@ export default function Login() {
   const validate = () => {
     let newErrors = {};
 
-    if (!form.email.includes("@")) {
-      newErrors.email = "Enter a valid email";
+    // Phone number (≥9 digits) or, for legacy/admin accounts, an email.
+    const id = form.identifier.trim();
+    const digits = id.replace(/\D/g, "");
+    if (!(id.includes("@") ? /^\S+@\S+\.\S+$/.test(id) : digits.length >= 9)) {
+      newErrors.identifier = t("auth.invalid_identifier");
     }
 
     if (form.password.length < 6) {
@@ -56,6 +66,18 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Store token + user via context so every consumer (Navbar included)
+  // re-renders immediately, then redirect: admins to the dashboard, others
+  // back where they came from. Shared by password login and OTP verification.
+  const finishLogin = (user, accessToken) => {
+    login(user, accessToken);
+    if (user.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate(from || "/", { replace: true });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,20 +88,17 @@ export default function Login() {
 
     try {
       const res = await authService.login(form);
-
       const { accessToken, user } = res.data;
-      // Store token + user via context so every consumer (Navbar included) re-renders immediately
-      login(user, accessToken);
-
-      // 🚀 redirect: admins to dashboard, others back where they came from
-      if (user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate(from || "/", { replace: true });
-      }
-
+      finishLogin(user, accessToken);
     } catch (err) {
-      setMessage(err.response?.data?.error || "Login failed");
+      const data = err.response?.data;
+      // Unverified phone account (signup never finished): move to the
+      // WhatsApp code step instead of a dead-end error.
+      if (err.response?.status === 403 && data?.needsVerification) {
+        setPendingVerify({ phone: data.phone || form.identifier });
+      } else {
+        setMessage(data?.error || "Login failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -91,6 +110,22 @@ export default function Login() {
         ref={containerRef}
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-white/10 p-8 space-y-6"
       >
+        {forgotOpen ? (
+          /* Forgot password: WhatsApp reset code → new password */
+          <ForgotPassword
+            onDone={finishLogin}
+            onBack={() => setForgotOpen(false)}
+          />
+        ) : pendingVerify ? (
+          /* WhatsApp code entry for an unverified account */
+          <OtpVerify
+            phone={pendingVerify.phone}
+            autoSend
+            onVerified={finishLogin}
+            onBack={() => setPendingVerify(null)}
+          />
+        ) : (
+        <>
 
         {verified && (
           <div className="bg-green-100 text-green-700 text-sm p-2 rounded-lg text-center">
@@ -113,24 +148,29 @@ export default function Login() {
           </p>
         </div>
 
+        {/* WhatsApp verification notice */}
+        <WhatsAppNote />
+
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* EMAIL */}
+          {/* PHONE NUMBER (or email for admin/legacy accounts) */}
           <div>
             <div className="relative">
-              <Mail className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+              <Phone className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
               <input
-                name="email"
-                placeholder={t("auth.email")}
+                name="identifier"
+                type="tel"
+                dir="ltr"
+                placeholder={t("auth.phone_placeholder")}
                 onChange={handleChange}
                 className={`w-full pl-10 pr-3 py-3 rounded-xl bg-gray-100 focus:bg-white border ${
-                  errors.email ? "border-red-400" : "border-transparent"
+                  errors.identifier ? "border-red-400" : "border-transparent"
                 } focus:ring-2 focus:ring-green-400 outline-none transition`}
               />
             </div>
-            {errors.email && (
+            {errors.identifier && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.email}
+                {errors.identifier}
               </p>
             )}
           </div>
@@ -166,6 +206,17 @@ export default function Login() {
             )}
           </div>
 
+          {/* FORGOT PASSWORD */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setForgotOpen(true)}
+              className="text-sm text-green-600 font-medium hover:underline"
+            >
+              {t("auth.forgot_password")}
+            </button>
+          </div>
+
           {/* BUTTON */}
           <button
             disabled={loading}
@@ -175,8 +226,6 @@ export default function Login() {
           </button>
 
         </form>
-
-        <SocialAuth />
 
         <p className="text-center text-sm text-gray-500">
           {t("auth.no_account")}{" "}
@@ -188,6 +237,8 @@ export default function Login() {
           </Link>
         </p>
 
+        </>
+        )}
       </div>
     </AuthShell>
   );

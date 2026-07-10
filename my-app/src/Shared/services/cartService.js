@@ -16,4 +16,9 @@ export const cartService = {
     api.put(`/cart/item/${productId}/${variantId}`, {
       quantity,
     }),
+
+  // ---- Bundle-offer lines ----
+  addBundle: (bundleId, quantity = 1) =>
+    api.post("/cart/bundle", { bundleId, quantity }),
+  removeBundle: (bundleId) => api.delete(`/cart/bundle/${bundleId}`),
 };

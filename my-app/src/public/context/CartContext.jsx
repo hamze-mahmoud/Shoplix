@@ -15,7 +15,7 @@ import { AuthContext } from "../../Shared/AuthContext";
 
 const CartContext = createContext();
 
-const EMPTY_CART = { items: [], total: 0 };
+const EMPTY_CART = { items: [], bundles: [], total: 0 };
 
 // Safely pull a human-readable message out of an API error, which may be a
 // plain string (`{ error: "..." }`) or a structured object
@@ -48,9 +48,11 @@ export function CartProvider({ children }) {
   const sessionRef = useRef(null);
 
   // --- Guest (local) cart -------------------------------------------------
+  // Bundle offers are a logged-in-only purchase (the sign-in gate is at add
+  // time, unlike single products), so a guest cart never has bundles.
   const loadGuestCart = () => {
     const items = guestCart.read();
-    setCart({ items, total: guestCart.total(items) });
+    setCart({ items, bundles: [], total: guestCart.total(items) });
   };
 
   // --- Server cart --------------------------------------------------------
@@ -63,6 +65,7 @@ export function CartProvider({ children }) {
       if (sessionRef.current !== owner) return;
       setCart({
         items: data.items || [],
+        bundles: data.bundles || [],
         total: data.total || 0,
       });
     } catch (err) {
@@ -183,10 +186,37 @@ export function CartProvider({ children }) {
     await fetchCart();
   };
 
-  const cartCount = cart.items.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+  // Bundle offers require an account (the login gate is here, not at checkout,
+  // because bundle carts aren't stored locally for guests).
+  const addBundleToCart = async (bundleId, quantity = 1) => {
+    if (!isLoggedIn) {
+      toastService.authRequired();
+      return false;
+    }
+    try {
+      await cartService.addBundle(bundleId, quantity);
+      await fetchCart();
+      toastService.success(t("offers.added_to_cart"));
+      return true;
+    } catch (err) {
+      if (err.response?.status === 401) {
+        toastService.authRequired();
+        return false;
+      }
+      toastService.error(apiMessage(err, t("offers.add_failed")));
+      return false;
+    }
+  };
+
+  const removeBundle = async (bundleId) => {
+    if (!isLoggedIn) return;
+    await cartService.removeBundle(bundleId);
+    await fetchCart();
+  };
+
+  const cartCount =
+    cart.items.reduce((sum, item) => sum + item.quantity, 0) +
+    (cart.bundles || []).reduce((sum, b) => sum + b.quantity, 0);
 
   // Cart follows the resolved auth state. We wait for auth to finish booting
   // (authLoading === false) so we never act on an unverified session.
@@ -235,6 +265,8 @@ export function CartProvider({ children }) {
         addToCart,
         updateQuantity,
         removeItem,
+        addBundleToCart,
+        removeBundle,
         addedItem,
         clearAddedItem,
       }}

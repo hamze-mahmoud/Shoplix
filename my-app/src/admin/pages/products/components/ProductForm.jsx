@@ -13,6 +13,9 @@ const emptyTranslations = () => ({
   he: { name: "", description: "" },
 });
 
+// "Who is this product for?" — drives the Tailored-for-you page + AI picks
+const AUDIENCE_OPTIONS = ["kids", "young", "women", "men", "elderly"];
+
 export default function ProductForm({
   onSubmit,
   initialData,
@@ -49,6 +52,7 @@ export default function ProductForm({
     isFeatured: false,
     hideWhenSoldOut: false,
     discountPercent: 0,
+    audienceTags: [],
   });
 
   const [translations, setTranslations] = useState(emptyTranslations());
@@ -63,6 +67,7 @@ export default function ProductForm({
       isFeatured: initialData.isFeatured || false,
       hideWhenSoldOut: initialData.hideWhenSoldOut || false,
       discountPercent: initialData.discountPercent || 0,
+      audienceTags: initialData.audienceTags || [],
     });
 
     const tr = initialData.translations;
@@ -118,6 +123,8 @@ export default function ProductForm({
 
     const payload = {
       ...form,
+      // JSON string survives the multipart serialization untouched
+      audienceTags: JSON.stringify(form.audienceTags || []),
       name: pick("name"),
       description: pick("description"),
       translations,
@@ -203,6 +210,42 @@ export default function ProductForm({
           </p>
         )}
         <p className="text-xs text-gray-500">{t("admin.products.discount_hint")}</p>
+      </div>
+
+      {/* 🔹 AUDIENCE SECTION — who is this product for? */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold">{t("admin.products.audience_label")}</h2>
+        <p className="text-xs text-gray-500">{t("admin.products.audience_hint")}</p>
+        <div className="flex flex-wrap gap-2">
+          {AUDIENCE_OPTIONS.map((tag) => {
+            const checked = (form.audienceTags || []).includes(tag);
+            return (
+              <label
+                key={tag}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border cursor-pointer text-sm font-medium transition ${
+                  checked
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) =>
+                    handleChange(
+                      "audienceTags",
+                      e.target.checked
+                        ? [...(form.audienceTags || []), tag]
+                        : (form.audienceTags || []).filter((x) => x !== tag)
+                    )
+                  }
+                  className="w-4 h-4 accent-blue-600"
+                />
+                {t(`tailored.seg_${tag}`)}
+              </label>
+            );
+          })}
+        </div>
       </div>
 
       {/* 🔹 VISIBILITY SECTION */}

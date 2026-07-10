@@ -30,6 +30,19 @@ const orderItemSchema = new mongoose.Schema({
   cost: Number    // cost price snapshot at time of sale (for accurate historical profit)
 });
 
+// A purchased bundle, snapshotted at sale time. `offerPrice` is the price for
+// ONE bundle; `quantity` is how many were bought. `items` are the constituent
+// product lines (for display + accurate cost/COGS), each already multiplied
+// into the bundle — line.quantity = perBundleQty * bundleQuantity.
+const orderBundleSchema = new mongoose.Schema({
+  bundle: { type: mongoose.Schema.Types.ObjectId, ref: "BundleOffer" },
+  title: String,
+  image: String,
+  offerPrice: Number, // per single bundle
+  quantity: Number,   // number of bundles purchased
+  items: [orderItemSchema],
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema({
 
   user: {
@@ -39,6 +52,9 @@ const orderSchema = new mongoose.Schema({
   },
 
   items: [orderItemSchema],
+
+  // Bundle-offer purchases (kept separate from single-product items).
+  bundles: [orderBundleSchema],
 
   totalPrice: {
     type: Number,

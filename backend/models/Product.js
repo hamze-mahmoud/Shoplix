@@ -72,6 +72,15 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  // Who the product is intended for (multi-select in the admin form).
+  // Empty array = suitable for everyone. Drives the "Tailored for you"
+  // page + audience diversity in AI recommendations.
+  audienceTags: {
+    type: [String],
+    enum: ["kids", "young", "women", "men", "elderly"],
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("Product", productSchema);

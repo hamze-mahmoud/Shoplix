@@ -64,6 +64,11 @@ const BannersList = lazy(() =>
   import("../admin/pages/banners/BannersList")
 );
 
+/* OFFERS */
+const OffersList = lazy(() =>
+  import("../admin/pages/offers/OffersList")
+);
+
 /* CLEAN ROUTES */
 const adminRoutes = [
   {
@@ -199,6 +204,16 @@ const adminRoutes = [
     element: (
       <ProtectedRoute role="admin">
         <BannersList />
+      </ProtectedRoute>
+    ),
+  },
+
+  /* OFFERS */
+  {
+    path: "/admin/offers",
+    element: (
+      <ProtectedRoute role="admin">
+        <OffersList />
       </ProtectedRoute>
     ),
   },

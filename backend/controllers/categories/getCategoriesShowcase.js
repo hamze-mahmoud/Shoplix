@@ -46,6 +46,7 @@ const getCategoriesShowcase = async (req, res) => {
         _id: cat._id,
         name: cat.name,
         description: cat.description || "",
+        translations: cat.translations,
         icon: cat.icon || "",
         isRoot: !cat.parent,
         image: resolveImage(cat),

@@ -67,6 +67,18 @@ module.exports = async function updateProduct(req, res) {
       product.discountPercent = Math.min(Math.max(Number(discountPercent) || 0, 0), 90);
     }
 
+    // "Who is this for?" tags — JSON string (multipart) or array
+    if (req.body.audienceTags !== undefined) {
+      const AUDIENCES = ["kids", "young", "women", "men", "elderly"];
+      let tags = req.body.audienceTags;
+      if (typeof tags === "string") {
+        try { tags = JSON.parse(tags); } catch { tags = undefined; }
+      }
+      if (Array.isArray(tags)) {
+        product.audienceTags = tags.filter((t) => AUDIENCES.includes(t));
+      }
+    }
+
     // 📦 PARSE VARIANTS — the client sends an array (form-serialized); tolerate
     // a JSON string too. (Previously this always JSON.parsed and crashed on the
     // array, which broke every product edit.)

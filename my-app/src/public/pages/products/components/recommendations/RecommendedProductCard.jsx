@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { formatPrice } from "../../../../../Shared/utils/formPrice";
+import { localized } from "../../../../../Shared/utils/localize";
 
 export default function RecommendedProductCard({ product }) {
+  const { i18n } = useTranslation();
+  const name = localized(product, "name", i18n.language) || product.name;
   // get all prices from variants
   const prices = product.variants?.map(v => v.price) || [];
 
@@ -33,7 +37,7 @@ export default function RecommendedProductCard({ product }) {
         {image ? (
           <img
             src={image}
-            alt={product.name}
+            alt={name}
             className="
               h-full
               object-contain
@@ -52,7 +56,7 @@ export default function RecommendedProductCard({ product }) {
       {/* INFO */}
       <div className="mt-3 space-y-1">
         <h3 className="text-sm font-semibold text-gray-900 line-clamp-1">
-          {product.name}
+          {name}
         </h3>
 
         {/* PRICE */}

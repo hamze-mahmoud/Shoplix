@@ -8,6 +8,7 @@ import {
   BarChart3,
   MessageSquareText,
   Images,
+  Tags,
 } from "lucide-react";
 
 export const menu = [
@@ -73,5 +74,12 @@ export const menu = [
     i18nKey: "admin.nav.banners",
     path: "/admin/banners",
     icon: Images,
+  },
+
+  {
+    name: "Offers",
+    i18nKey: "admin.nav.offers",
+    path: "/admin/offers",
+    icon: Tags,
   },
 ];

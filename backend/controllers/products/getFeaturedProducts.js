@@ -11,7 +11,7 @@ const getFeaturedProducts = async (req, res) => {
     // 🔥 Get featured products (cached — homepage hits this constantly)
     const products = await cache.getOrSet(`products:featured:${limit}`, 120, async () => {
       const found = await Product.find({ isFeatured: true })
-        .populate("category", "name")
+        .populate("category", "name translations")
         .sort({ createdAt: -1 })
         .limit(limit + 6) // fetch a few extra to backfill after filtering
         .lean();

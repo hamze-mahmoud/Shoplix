@@ -66,6 +66,7 @@ export default function ProductGallery({ product }) {
             alt={product.name}
             loading="eager"
             onError={onImgError}
+            data-product-image
             className="w-full h-full object-contain p-6 transition-transform duration-200"
             style={zoomed ? {
               transform: "scale(2)",

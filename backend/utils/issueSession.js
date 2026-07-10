@@ -1,8 +1,7 @@
 const RefreshToken = require("../models/RefreshToken");
 const generateAccessToken = require("./generateAccessToken");
 const generateRefreshToken = require("./generateRefreshToken");
-
-const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const { refreshCookieOptions, REFRESH_TTL_MS } = require("./cookieOptions");
 
 // Issue a login session for `user`: mints an access token, creates + stores a
 // refresh token, and sets the httpOnly refresh cookie. Mirrors the logic in
@@ -21,12 +20,7 @@ module.exports = async function issueSession(res, user) {
     expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
   });
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: REFRESH_TTL_MS,
-  });
+  res.cookie("refreshToken", refreshToken, refreshCookieOptions());
 
   return accessToken;
 };

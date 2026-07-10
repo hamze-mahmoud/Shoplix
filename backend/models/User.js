@@ -16,12 +16,12 @@ const userSchema = new mongoose.Schema({
   trim: true,
   match: [/^\S+@\S+\.\S+$/, 'Please use a valid email']
 },
-  // Optional: social-login users (Google/Facebook) have no local password.
-  passwordHash: { type: String },
-  // Auth provider this account was created with / can use.
-  provider: { type: String, enum: ['local', 'google', 'facebook'], default: 'local' },
-  providerId: { type: String }, // Google `sub` / Facebook user id
-  avatar: { type: String },     // profile picture URL from the provider
+  // Phone sign-in: `phone` is the number as typed (digits, for display and
+  // WhatsApp), `phoneKey` is the canonical last-9-digits lookup key so the
+  // same number matches with or without a country code.
+  phone: { type: String, trim: true },
+  phoneKey: { type: String, unique: true, sparse: true, index: true },
+  passwordHash: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
 
   isActive: { type: Boolean, default: true },

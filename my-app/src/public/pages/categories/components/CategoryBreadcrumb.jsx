@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { categoryService } from "../../../../Shared/services/categoryService";
+import { localized } from "../../../../Shared/utils/localize";
 
 export default function CategoryBreadcrumb({ category }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [trail, setTrail] = useState([]);
 
   useEffect(() => {
@@ -13,7 +14,9 @@ export default function CategoryBreadcrumb({ category }) {
     categoryService
       .getCategoryBreadcrumb(category._id)
       .then((res) => setTrail(res.data || []))
-      .catch(() => setTrail([{ _id: category._id, name: category.name }]));
+      .catch(() =>
+        setTrail([{ _id: category._id, name: category.name, translations: category.translations }])
+      );
   }, [category?._id]);
 
   return (
@@ -29,10 +32,10 @@ export default function CategoryBreadcrumb({ category }) {
         <span key={c._id} className="flex items-center gap-1.5">
           <ChevronRight className="w-3.5 h-3.5 shrink-0 rtl:rotate-180" />
           {i === trail.length - 1 ? (
-            <span className="text-gray-900 font-medium">{c.name}</span>
+            <span className="text-gray-900 font-medium">{localized(c, "name", i18n.language) || c.name}</span>
           ) : (
             <Link to={`/categories/${c._id}`} className="hover:text-green-600 transition">
-              {c.name}
+              {localized(c, "name", i18n.language) || c.name}
             </Link>
           )}
         </span>

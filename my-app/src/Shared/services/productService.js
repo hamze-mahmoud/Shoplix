@@ -35,4 +35,9 @@
 
     getBestSellers: (params) => api.get("/products/bestsellers", { params }),
 
+    // AI picks — season/holiday-aware, diverse, rotates every 6h.
+    // params: { limit, audience: "kids"|"young"|"women"|"men"|"elderly" }
+    getSmartRecommendations: (params) =>
+      api.get("/products/recommendations/smart", { params }),
+
   };

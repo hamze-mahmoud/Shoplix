@@ -1,15 +1,56 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, ArrowLeft } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Tags, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useCart } from "../../context/CartContext";
 import CartItem from "./components/CartItem";
 import CartSummary from "./components/CartSummary";
+import { formatPrice } from "../../../Shared/utils/formPrice";
+import { localized } from "../../../Shared/utils/localize";
+
+// A bundle-offer line in the cart (rendered alongside single-product items).
+function CartBundleRow({ bundle, onRemove }) {
+  const { t, i18n } = useTranslation();
+  const title = localized(bundle, "title", i18n.language) || bundle.title;
+  return (
+    <div className="bg-white rounded-3xl border border-[#2563EB]/20 shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2 bg-[#2563EB]/5 px-4 py-2 text-xs font-semibold text-[#2563EB]">
+        <Tags className="w-3.5 h-3.5" />
+        {t("offers.bundle_deal")}
+      </div>
+      <div className="p-4 flex items-center gap-4">
+        {bundle.image ? (
+          <img src={bundle.image} alt="" className="w-20 h-20 rounded-2xl object-cover border border-gray-100 shrink-0" />
+        ) : (
+          <div className="w-20 h-20 rounded-2xl bg-gray-100 shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <Link to={`/offers/${bundle.bundleId}`} className="font-bold text-[#111827] hover:text-[#2563EB] truncate block">
+            {title}
+          </Link>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {bundle.products?.length} {t("offers.items_included")} · ×{bundle.quantity}
+          </p>
+          <p className="text-lg font-bold text-[#2563EB] mt-1">{formatPrice(bundle.subtotal)}</p>
+        </div>
+        <button
+          onClick={() => onRemove(bundle.bundleId)}
+          className="p-2.5 rounded-xl text-red-500 hover:bg-red-50 shrink-0"
+          title={t("cart.remove")}
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Cart() {
-  const { cart } = useCart();
+  const { cart, removeBundle } = useCart();
   const { t } = useTranslation();
-  const isEmpty = !cart.items || cart.items.length === 0;
+  const bundles = cart.bundles || [];
+  const isEmpty =
+    (!cart.items || cart.items.length === 0) && bundles.length === 0;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
@@ -30,7 +71,7 @@ export default function Cart() {
           </h1>
           {!isEmpty && (
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-400 text-[#111827]">
-              {t("cart.items", { count: cart.items.length })}
+              {t("cart.items", { count: cart.items.length + bundles.length })}
             </span>
           )}
         </div>
@@ -54,6 +95,9 @@ export default function Cart() {
           /* CART CONTENT */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
+              {bundles.map((b) => (
+                <CartBundleRow key={b.bundleId} bundle={b} onRemove={removeBundle} />
+              ))}
               {cart.items.map((item) => (
                 <CartItem key={item.variantId || item.productId} item={item} />
               ))}

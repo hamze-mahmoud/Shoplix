@@ -1,7 +1,8 @@
 import { io } from "socket.io-client";
 
-// Single shared socket connection for the whole app.
-const SOCKET_URL = "http://localhost:3000";
+// Single shared socket connection for the whole app. In production point
+// VITE_SOCKET_URL at the deployed backend (same host as the API, no /api).
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
 
 let socket = null;
 

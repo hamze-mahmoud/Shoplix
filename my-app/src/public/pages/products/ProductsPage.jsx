@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SearchX, Star, ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import ProductFilters from "./components/listing/ProductFilters";
 
@@ -15,11 +14,61 @@ import { formatPrice } from "../../../Shared/utils/formPrice";
 import { discountOf, salePrice } from "../../../Shared/utils/pricing";
 import SaleBadge from "../../../Shared/components/SaleBadge";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Ambient living background — huge blurred color blobs drifting very
+   slowly behind the whole page. Decorative only: pointer-events none,
+   static under prefers-reduced-motion. */
+function AmbientBackdrop() {
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion() || !rootRef.current) return;
+    const blobs = rootRef.current.querySelectorAll("[data-blob]");
+    const ctx = gsap.context(() => {
+      blobs.forEach((blob, i) => {
+        gsap.to(blob, {
+          xPercent: gsap.utils.random(-16, 16),
+          yPercent: gsap.utils.random(-14, 14),
+          scale: gsap.utils.random(0.9, 1.18),
+          duration: gsap.utils.random(16, 26),
+          delay: i * -6, // desynchronize
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+    }, rootRef);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div
+      ref={rootRef}
+      aria-hidden
+      className="pointer-events-none fixed inset-0 overflow-hidden -z-10"
+    >
+      <div
+        data-blob
+        className="absolute -top-40 -left-32 w-[38rem] h-[38rem] rounded-full bg-green-500/[0.10] blur-[130px]"
+      />
+      <div
+        data-blob
+        className="absolute top-[28%] -right-44 w-[34rem] h-[34rem] rounded-full bg-emerald-300/[0.14] blur-[120px]"
+      />
+      <div
+        data-blob
+        className="absolute bottom-[-18%] left-[22%] w-[40rem] h-[40rem] rounded-full bg-teal-200/[0.12] blur-[140px]"
+      />
+      <div
+        data-blob
+        className="absolute top-[55%] left-[55%] w-[26rem] h-[26rem] rounded-full bg-amber-100/[0.16] blur-[110px]"
+      />
+    </div>
+  );
+}
 
 /* Precise partial-fill star rating (green / black / white) */
 function Stars({ value = 0, count = 0, t }) {
@@ -99,7 +148,8 @@ function ProductCard2027({ product, t, lang }) {
         {/* diagonal shine sweep on hover */}
         <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[900ms] ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12" />
 
-        {/* top-start badges: SALE + rating */}
+        {/* top-start badge stack: SALE + rating + sold-out (single column
+            so they never collide on narrow mobile cards) */}
         <div className="absolute top-3 start-3 flex flex-col items-start gap-1.5">
           {discount > 0 && <SaleBadge percent={discount} />}
           {reviews > 0 && (
@@ -108,14 +158,12 @@ function ProductCard2027({ product, t, lang }) {
               {Number(rating).toFixed(1)}
             </span>
           )}
+          {stock === 0 && (
+            <span className="bg-[#111827] text-white text-[10px] uppercase tracking-[0.16em] font-semibold px-2.5 py-1 rounded-full">
+              {t("products.sold_out")}
+            </span>
+          )}
         </div>
-
-        {/* sold-out badge */}
-        {stock === 0 && (
-          <span className="absolute top-3 end-3 bg-[#111827] text-white text-[10px] uppercase tracking-[0.16em] font-semibold px-2.5 py-1 rounded-full">
-            {t("products.sold_out")}
-          </span>
-        )}
 
         {/* hover glass "view product" bar */}
         <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/20 px-4 py-3 flex items-center justify-between text-white opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400">
@@ -162,6 +210,20 @@ export default function ProductsPage() {
   const [error, setError] = useState(null);
 
   const gridRef = useRef(null);
+  const heroRef = useRef(null);
+
+  // one-shot cinematic hero entrance
+  useEffect(() => {
+    if (!heroRef.current || prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap
+        .timeline({ defaults: { ease: "power4.out" } })
+        .from("[data-hero-kicker]", { autoAlpha: 0, y: 16, duration: 0.7 })
+        .from("[data-hero-title]", { yPercent: 110, duration: 1.05 }, 0.12)
+        .from("[data-hero-count]", { autoAlpha: 0, x: 24, duration: 0.7 }, 0.5);
+    }, heroRef);
+    return () => ctx.revert();
+  }, []);
 
   const selectedCategory = useMemo(
     () => categories.find((item) => item._id === category),
@@ -195,25 +257,67 @@ export default function ProductsPage() {
     })();
   }, [category, sort]);
 
-  // GSAP staggered grid reveal — robust to reduced-motion / hidden tab
+  // Staggered grid reveal — IntersectionObserver batches (works for
+  // async-loaded cards, unlike stale ScrollTrigger positions) + a safety
+  // timeout so cards can never stay hidden.
   useEffect(() => {
     if (loading || !products.length || !gridRef.current) return;
-    const cards = gridRef.current.querySelectorAll("[data-pcard]");
+    const cards = [...gridRef.current.querySelectorAll("[data-pcard]")];
     if (prefersReducedMotion() || document.hidden) {
-      gsap.set(cards, { opacity: 1, y: 0 });
+      gsap.set(cards, { opacity: 1 });
       return;
     }
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1, y: 0, duration: 0.6, stagger: 0.06, ease: "power3.out",
-          scrollTrigger: { trigger: gridRef.current, start: "top 85%", once: true },
+
+    gsap.set(cards, { opacity: 0, y: 34, scale: 0.97 });
+
+    const seen = new Set();
+    let pending = [];
+    let raf = null;
+    const flush = () => {
+      gsap.to(pending, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.7,
+        stagger: 0.07,
+        ease: "power3.out",
+        clearProps: "transform",
+      });
+      pending = [];
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !seen.has(e.target)) {
+            seen.add(e.target);
+            pending.push(e.target);
+            io.unobserve(e.target);
+          }
         }
-      );
-    }, gridRef);
-    return () => ctx.revert();
+        if (pending.length) {
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(flush);
+        }
+      },
+      // huge top margin: cards jumped over (End key, anchors) still count
+      // as intersecting and get revealed rather than staying invisible
+      { rootMargin: "9999px 0px -8% 0px" }
+    );
+    cards.forEach((c) => io.observe(c));
+
+    // fallback ONLY if the observer never fired (e.g. unsupported) — a
+    // blanket reveal here would defeat the on-scroll effect for cards
+    // below the fold.
+    const safety = setTimeout(() => {
+      if (seen.size === 0) {
+        gsap.to(cards, { opacity: 1, y: 0, scale: 1, duration: 0.5, clearProps: "transform" });
+      }
+    }, 2000);
+    return () => {
+      io.disconnect();
+      clearTimeout(safety);
+      cancelAnimationFrame(raf);
+    };
   }, [loading, products]);
 
   const resetFilters = () => {
@@ -222,22 +326,26 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111827]">
+    <div className="relative min-h-screen bg-white/0 text-[#111827]">
+      <AmbientBackdrop />
+
       {/* HERO with green/black accent */}
-      <section className="relative overflow-hidden border-b border-black/[0.06]">
+      <section ref={heroRef} className="relative overflow-hidden border-b border-black/[0.06]">
         <div className="absolute -top-32 -end-24 w-[26rem] h-[26rem] bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-0 start-0 w-1.5 h-full bg-gradient-to-b from-[#16A34A] to-[#111827]" />
 
         <div className="relative max-w-7xl mx-auto px-5 sm:px-10 py-10 sm:py-20">
-          <p className="inline-flex items-center gap-2.5 text-xs uppercase tracking-[0.28em] text-[#16A34A] font-semibold">
+          <p data-hero-kicker className="inline-flex items-center gap-2.5 text-xs uppercase tracking-[0.28em] text-[#16A34A] font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" />
             {t("products.browse")}
           </p>
           <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-3">
-            <h1 className="font-display font-light text-4xl sm:text-7xl lg:text-8xl leading-[0.95] sm:leading-[0.9] tracking-tight">
-              {selectedCategory ? localized(selectedCategory, "name", i18n.language) : t("nav.products")}
-            </h1>
-            <p className="text-xs uppercase tracking-[0.18em] text-[#111827]/50">
+            <div className="overflow-hidden">
+              <h1 data-hero-title className="font-display font-light text-4xl sm:text-7xl lg:text-8xl leading-[0.95] sm:leading-[0.9] tracking-tight">
+                {selectedCategory ? localized(selectedCategory, "name", i18n.language) : t("nav.products")}
+              </h1>
+            </div>
+            <p data-hero-count className="text-xs uppercase tracking-[0.18em] text-[#111827]/50">
               {t("products.count", { count: products.length })}
             </p>
           </div>

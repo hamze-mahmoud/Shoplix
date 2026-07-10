@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../../../../context/CartContext";
 import gsap from "gsap";
 import { toastService } from "../../../../../Shared/services/toastService";
+import { flyToCart } from "../../../../../Shared/utils/flyToCart";
 
 export default function AddToCartSection({ product, variant }) {
   const { t } = useTranslation();
@@ -21,6 +22,13 @@ export default function AddToCartSection({ product, variant }) {
     }
     if (isOutOfStock) return;
 
+    // Snapshot the fly source BEFORE the await (layout may shift after).
+    // Prefer the real product photo; fall back to the button itself.
+    const btn = e.currentTarget;
+    const flySource =
+      document.querySelector("[data-product-image]") || btn;
+    const flyImage = variant?.images?.[0] || product?.image;
+
     setAdding(true);
     try {
       // Pass the full product + variant so a guest cart can store a display
@@ -33,7 +41,10 @@ export default function AddToCartSection({ product, variant }) {
         variant,
       });
 
-      gsap.fromTo(e.currentTarget,
+      // Dopamine: the product image arcs into the cart, badge pops +1.
+      flyToCart({ imageUrl: flyImage, source: flySource });
+
+      gsap.fromTo(btn,
         { scale: 1 },
         { scale: 1.06, duration: 0.15, yoyo: true, repeat: 1, ease: "power2.out" }
       );

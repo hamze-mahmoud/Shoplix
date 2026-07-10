@@ -1,0 +1,52 @@
+# Render Blueprint — deploys the Shoplix backend (API + WhatsApp bot + Socket.io).
+# In Render: New → Blueprint → connect this repo → it reads this file.
+# Secrets (sync:false) are entered once in the Render dashboard, never in git.
+services:
+  - type: web
+    name: shoplix-backend
+    runtime: node
+    plan: free # upgrade to "starter" ($7/mo) to stop the 15-min idle sleep
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # --- set these in the Render dashboard (Environment tab) ---
+      - key: MONGODB_URI # MongoDB Atlas connection string
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: FRONTEND_URL # your Vercel URL, e.g. https://shoplix.vercel.app
+        sync: false
+      - key: SERVER_URL # this service's URL, e.g. https://shoplix-backend.onrender.com
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TEMPLATE_NAME
+        sync: false
+      - key: WHATSAPP_TEMPLATE_LANG
+        sync: false
+      - key: WHATSAPP_DEFAULT_CC
+        sync: false
+      - key: WHATSAPP_WEBHOOK_VERIFY_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY # optional (leave blank if unused)
+        sync: false

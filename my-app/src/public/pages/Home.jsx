@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, ShieldCheck, Truck, BadgeCheck, Lock } from "lucide-react";
@@ -14,6 +14,13 @@ import { localized } from "../../Shared/utils/localize";
 import { formatPrice } from "../../Shared/utils/formPrice";
 import { discountOf, salePrice } from "../../Shared/utils/pricing";
 import SaleBadge from "../../Shared/components/SaleBadge";
+
+// three.js showcase is heavy — load it in its own chunk, render when ready
+const Showcase3D = lazy(() => import("../components/Showcase3D"));
+// Special Offers band (own chunk — also pulls three.js lazily)
+const SpecialOffers = lazy(() => import("../components/SpecialOffers"));
+// AI "picked for you" teaser rail
+const SmartPicks = lazy(() => import("../components/SmartPicks"));
 
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -93,11 +100,22 @@ export default function Home() {
     { icon: Lock, label: t("home.trust_secure") },
   ];
 
+  // 3D showcase feed: featured first, topped up with best sellers (unique).
+  const showcaseProducts = [
+    ...products,
+    ...bestSellers.filter((b) => !products.some((p) => p._id === b._id)),
+  ];
+
   return (
     <div className="bg-[#F8F9FA] text-[#111827]">
 
       {/* ================= HERO ================= */}
       <HeroSlider slides={slides} />
+
+      {/* ================= 3D SHOWCASE ================= */}
+      <Suspense fallback={null}>
+        <Showcase3D products={showcaseProducts} />
+      </Suspense>
 
       {/* ================= TRUST ================= */}
       <section className="border-y border-black/10 bg-white">
@@ -112,6 +130,11 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ================= SPECIAL OFFERS ================= */}
+      <Suspense fallback={null}>
+        <SpecialOffers />
+      </Suspense>
 
       {/* ================= BEST SELLERS ================= */}
       {bestSellers.length > 0 && (
@@ -132,6 +155,11 @@ export default function Home() {
           <ProductCarousel products={bestSellers} showSold />
         </section>
       )}
+
+      {/* ================= AI PICKS (tailored teaser) ================= */}
+      <Suspense fallback={null}>
+        <SmartPicks />
+      </Suspense>
 
       {/* ================= CATEGORIES (green / white / black grid) ================= */}
       <section className="relative overflow-hidden bg-white border-y border-black/[0.06]">
@@ -211,7 +239,7 @@ export default function Home() {
                         {img ? (
                           <img
                             src={img}
-                            alt={p.name}
+                            alt={localized(p, "name", i18n.language) || p.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
@@ -223,11 +251,11 @@ export default function Home() {
 
                       <div className="p-4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">
-                          {p.category?.name}
+                          {localized(p.category, "name", i18n.language) || p.category?.name}
                         </p>
 
                         <h3 className="mt-1 text-lg font-light group-hover:text-green-600 transition">
-                          {p.name}
+                          {localized(p, "name", i18n.language) || p.name}
                         </h3>
 
                         {discount > 0 ? (

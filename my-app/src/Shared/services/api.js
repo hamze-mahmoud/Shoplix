@@ -1,10 +1,36 @@
 import axios from "axios";
 
 // =====================
+// IN-MEMORY SESSION STATE (security)
+// =====================
+// The access token — and the user object with its role — are deliberately
+// kept ONLY in memory, never in localStorage or JS-readable cookies. Anything
+// a script can read, a user (or injected script) can read AND forge; route
+// guards must never trust it. Sessions survive page reloads through the
+// httpOnly refresh cookie, which JS cannot touch and the SERVER re-verifies
+// on every boot before handing back a fresh token + identity.
+let accessToken = null;
+export const setAccessToken = (t) => {
+  accessToken = t || null;
+};
+export const getAccessToken = () => accessToken;
+export const clearAccessToken = () => {
+  accessToken = null;
+};
+
+// Non-sensitive boolean hint ("a session probably exists") so the boot
+// sequence knows whether a cookie-refresh attempt is worth making. It holds
+// no identity, no role — forging it only earns a failed 401 refresh.
+const SESSION_FLAG = "hasSession";
+export const markSession = () => localStorage.setItem(SESSION_FLAG, "1");
+export const hasSessionFlag = () => localStorage.getItem(SESSION_FLAG) === "1";
+export const clearSessionFlag = () => localStorage.removeItem(SESSION_FLAG);
+
+// =====================
 // MAIN API INSTANCE
 // =====================
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   withCredentials: true,
 });
 
@@ -12,7 +38,7 @@ const api = axios.create({
 // REFRESH API (IMPORTANT: separate instance)
 // =====================
 const refreshApi = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   withCredentials: true,
 });
 
@@ -20,12 +46,9 @@ const refreshApi = axios.create({
 // REQUEST INTERCEPTOR
 // =====================
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-
-  if (token && token !== "undefined") {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
-
   return config;
 });
 
@@ -50,7 +73,7 @@ const processQueue = (error, token = null) => {
 // Endpoints that must NOT trigger the refresh flow. A 401 from any of these
 // just means "not logged in" — refreshing/redirecting on them causes the
 // constant refresh loop and bounces logged-out users off public pages.
-const AUTH_PROBE_ROUTES = ["/auth/me", "/auth/refresh", "/auth/signin", "/auth/signup", "/auth/logout", "/auth/google", "/auth/facebook"];
+const AUTH_PROBE_ROUTES = ["/auth/me", "/auth/refresh", "/auth/signin", "/auth/signup", "/auth/logout", "/auth/verify-otp", "/auth/resend-otp", "/auth/forgot-password", "/auth/reset-password"];
 
 const isAuthProbe = (url = "") => AUTH_PROBE_ROUTES.some((r) => url.includes(r));
 
@@ -65,12 +88,10 @@ api.interceptors.response.use(
     //  - we haven't already retried this request
     //  - we actually have a token to refresh (logged-in session)
     //  - the failing request isn't itself an auth probe
-    const hasToken = !!localStorage.getItem("accessToken");
-
     if (
       error.response?.status === 401 &&
       !original._retry &&
-      hasToken &&
+      !!accessToken &&
       !isAuthProbe(original?.url)
     ) {
       original._retry = true;
@@ -88,16 +109,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // CALL REFRESH TOKEN
+        // CALL REFRESH TOKEN (httpOnly cookie authenticates this)
         const res = await refreshApi.post("/auth/refresh");
-        console.log("res of refrch token ",res)
         const newToken = res.data.accessToken;
 
-        // SAVE TOKEN (IMPORTANT: consistent key)
-        localStorage.setItem("accessToken", newToken);
-
-        // UPDATE DEFAULT HEADER
-        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+        setAccessToken(newToken);
 
         // PROCESS QUEUE
         processQueue(null, newToken);
@@ -110,7 +126,8 @@ api.interceptors.response.use(
         processQueue(err, null);
 
         // CLEAR AUTH — the session is genuinely dead.
-        localStorage.removeItem("accessToken");
+        clearAccessToken();
+        clearSessionFlag();
 
         // Only send the user to /login if they're on a page that actually
         // requires auth. Public pages (home, products, categories, cart…)

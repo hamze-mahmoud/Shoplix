@@ -37,6 +37,7 @@ const getBestSellers = async (req, res) => {
           $project: {
             _id: "$product._id",
             name: "$product.name",
+            translations: "$product.translations",
             basePrice: "$product.basePrice",
             variants: "$product.variants",
             category: "$product.category",
@@ -47,13 +48,13 @@ const getBestSellers = async (req, res) => {
       ]);
 
       // Populate category names
-      await Order.db.model("Product").populate(ranked, { path: "category", select: "name" });
+      await Order.db.model("Product").populate(ranked, { path: "category", select: "name translations" });
 
       // Fallback: if no sales data, surface newest products
       if (ranked.length === 0) {
         const Product = Order.db.model("Product");
         const newest = await Product.find()
-          .populate("category", "name")
+          .populate("category", "name translations")
           .sort({ createdAt: -1 })
           .limit(limit)
           .lean();

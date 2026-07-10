@@ -18,7 +18,7 @@ const getCategoryWithProducts = async (req, res) => {
     const products = await Product.find({
       category: id,
     })
-      .populate("category", "name")
+      .populate("category", "name translations")
       .limit(50)
       .sort({ createdAt: -1 });
 

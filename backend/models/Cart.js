@@ -8,6 +8,15 @@ const cartSchema = new mongoose.Schema({
       quantity: Number,
       price: Number // 💡 مهم جدًا (سعر وقت الإضافة)
     }
+  ],
+  // Bundle-offer lines, kept separate from single-product items. Each line is
+  // one whole bundle bought `quantity` times at `price` (offerPrice snapshot).
+  bundles: [
+    {
+      bundle: { type: mongoose.Schema.Types.ObjectId, ref: 'BundleOffer' },
+      quantity: { type: Number, default: 1 },
+      price: Number // offerPrice at time of adding
+    }
   ]
 }, { timestamps: true });
 

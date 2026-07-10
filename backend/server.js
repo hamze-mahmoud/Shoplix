@@ -22,9 +22,15 @@ const adminRouter = require("./routes/admin");
 const adminDashboard = require("./routes/dashboard");
 const reviewsRouter = require("./routes/reviews");
 const bannersRouter = require("./routes/banners");
+const offersRouter = require("./routes/offers");
+const whatsappRouter = require("./routes/whatsapp");
 
 const app = express();
 const server = http.createServer(app);
+
+// Behind Render/Vercel's TLS-terminating proxy: trust the X-Forwarded-* headers
+// so `secure` cookies (SameSite=None) are honored in production.
+app.set("trust proxy", 1);
 
 const PORT = process.env.PORT || 3000;
 
@@ -127,6 +133,8 @@ app.use("/api/admin", adminRouter);
 app.use("/api/dashboard", adminDashboard);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/banners", bannersRouter);
+app.use("/api/offers", offersRouter);
+app.use("/api/whatsapp", whatsappRouter);
 
 // =======================
 // HEALTH CHECK

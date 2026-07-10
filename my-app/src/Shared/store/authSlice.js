@@ -9,25 +9,24 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// NOTE: tokens/identity are memory-only by design (see api.js) — this slice
+// must never write them to localStorage.
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
-    token: localStorage.getItem("token") || null,
+    token: null,
   },
   reducers: {
     logoutUser: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
-
-      localStorage.setItem("token", action.payload.token);
     });
   },
 });

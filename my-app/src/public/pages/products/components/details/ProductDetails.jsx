@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { ChevronRight, ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { productService } from "../../../../../Shared/services/productService";
+import { localized } from "../../../../../Shared/utils/localize";
 
 import ProductGallery from "./ProductGallery";
 import ProductInfo from "./ProductInfo";
@@ -29,7 +30,7 @@ function Skeleton() {
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [error, setError] = useState(null);
@@ -58,7 +59,7 @@ export default function ProductDetails() {
           {product && (
             <>
               <ChevronRight className="w-3 h-3 shrink-0 rtl:rotate-180" />
-              <span className="text-[#111827] line-clamp-1">{product.name}</span>
+              <span className="text-[#111827] line-clamp-1">{localized(product, "name", i18n.language) || product.name}</span>
             </>
           )}
         </nav>

@@ -13,6 +13,8 @@ router.get('/:id/variants',variantCtrl.getVariantsByProduct)
 router.get('/', productsCtrl.getAllProducts)
 router.get("/featured", productsCtrl.getFeaturedProducts)
 router.get("/bestsellers", productsCtrl.getBestSellers)
+// AI-curated picks (season/holiday-aware, diverse, rotates every 6h)
+router.get("/recommendations/smart", productsCtrl.getSmartRecommendations)
 router.get("/search", productsCtrl.searchProducts)
 router.get("/autocomplete", productsCtrl.autocompleteSearch)
 

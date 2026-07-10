@@ -1,85 +1,73 @@
 import { createContext, useState, useEffect } from "react";
 import { authService, clearAuthStorage } from "./services/authService";
+import {
+  setAccessToken,
+  clearAccessToken,
+  markSession,
+  hasSessionFlag,
+  clearSessionFlag,
+} from "./services/api";
 
 export const AuthContext = createContext();
 
-const readCachedUser = () => {
-  try {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
-  } catch {
-    return null;
-  }
-};
-
 export function AuthProvider({ children }) {
-  // `user` from localStorage is only a display cache to avoid a flash of the
-  // logged-out navbar on reload — it is NOT the source of truth. The real
-  // session lives in the httpOnly refresh cookie + access token, which the
-  // boot sequence below verifies before we trust this value.
-  const [user, setUser] = useState(readCachedUser);
+  // SECURITY: the user object (id, role) lives ONLY in React state, and the
+  // access token only in module memory (api.js). Neither is ever persisted
+  // to localStorage or JS-readable cookies — client storage is forgeable, so
+  // nothing that drives authorization may live there. On reload the session
+  // is re-established from the httpOnly refresh cookie, which only the
+  // SERVER can read and verify.
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // ---------------------------------------------------------------------------
   // Session bootstrap — the SINGLE place that decides "logged in" vs "guest".
   //
-  // We resolve the session to a definitive state so the rest of the app (cart,
-  // notifications) never acts on an ambiguous one. The bug this fixes: a stale
-  // cached user used to briefly look logged-in, which kicked off a /cart fetch
-  // that silently refreshed the still-valid cookie and pulled the previous
-  // user's cart into a "logged out" UI.
-  //
   // Outcomes:
-  //   • pure guest (no token, no cached user) → guest, ZERO network calls
-  //   • valid access token                    → /auth/me, logged in
-  //   • expired token but valid refresh cookie → refresh → /auth/me, logged in
-  //   • no valid session                       → guest, all auth state cleared
+  //   • pure guest (no session flag, no legacy traces) → guest, ZERO network calls
+  //   • session flag present → cookie refresh → /auth/me → logged in
+  //   • refresh/me fails → guest, all auth state cleared
   // ---------------------------------------------------------------------------
   useEffect(() => {
     let active = true;
 
     const finishAsGuest = () => {
       if (!active) return;
-      clearAuthStorage();
+      clearAccessToken();
+      clearSessionFlag();
       setUser(null);
       setLoading(false);
     };
 
     const finishAsUser = (data) => {
       if (!active) return;
+      markSession();
       setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
       setLoading(false);
     };
 
     (async () => {
-      const token = localStorage.getItem("accessToken");
-      const cachedUser = readCachedUser();
+      // Migration: older app versions persisted the token + user object in
+      // localStorage. Treat their presence as evidence of a session (so the
+      // user isn't logged out by this update), then wipe them for good —
+      // identity must never live in client storage again.
+      const legacyEvidence =
+        !!localStorage.getItem("accessToken") || !!localStorage.getItem("user");
+      clearAuthStorage();
 
-      // No evidence of any prior session → guest, make no auth calls at all.
-      if ((!token || token === "undefined") && !cachedUser) {
+      // No hint of any prior session → guest, make no auth calls at all.
+      if (!hasSessionFlag() && !legacyEvidence) {
         finishAsGuest();
         return;
       }
 
-      // 1) If we have an access token, try it directly.
-      if (token && token !== "undefined") {
-        try {
-          const { data } = await authService.getMe();
-          return finishAsUser(data);
-        } catch {
-          // token invalid/expired — fall through to a refresh attempt.
-        }
-      }
-
-      // 2) Try to restore the session from the refresh cookie. This succeeds
-      //    for a returning user whose access token is gone/expired, and fails
-      //    cleanly (401) for a genuine guest. /auth/refresh is an auth-probe,
-      //    so the response interceptor will not recurse here.
+      // Restore the session from the httpOnly refresh cookie. Succeeds for a
+      // returning user, fails cleanly (401) for a stale flag. /auth/refresh
+      // is an auth-probe, so the response interceptor will not recurse here.
       try {
         const { data } = await authService.refresh();
         if (!data?.accessToken) throw new Error("no access token");
-        localStorage.setItem("accessToken", data.accessToken);
+        setAccessToken(data.accessToken);
 
         const me = await authService.getMe();
         return finishAsUser(me.data);
@@ -94,8 +82,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (userData, accessToken) => {
-    if (accessToken) localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("user", JSON.stringify(userData));
+    if (accessToken) setAccessToken(accessToken);
+    markSession();
     setUser(userData);
   };
 

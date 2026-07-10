@@ -155,6 +155,8 @@ export default function Navbar() {
   const navLinks = [
     { to: "/products", label: t("nav.products") },
     { to: "/categories", label: t("nav.categories") },
+    { to: "/offers", label: t("nav.offers") },
+    { to: "/tailored", label: t("nav.tailored") },
     { to: "/about", label: t("nav.about") },
     { to: "/contact", label: t("nav.contact") },
   ];
@@ -284,7 +286,7 @@ export default function Navbar() {
 
             <div className="relative">
               <Link to="/cart" className={iconBtn} aria-label={t("nav.cart")}>
-                <ShoppingCart className="w-5 h-5 text-[#111827] group-hover:text-green-600 transition-colors" />
+                <ShoppingCart id="nav-cart-icon" className="w-5 h-5 text-[#111827] group-hover:text-green-600 transition-colors" />
                 {cartCount > 0 && (
                   <span
                     ref={badgeRef}

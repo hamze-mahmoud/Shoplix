@@ -14,6 +14,7 @@ const getCategoryBreadcrumb = async (req, res) => {
       breadcrumb.unshift({
         _id: category._id,
         name: category.name,
+        translations: category.translations,
       });
 
       category = category.parent

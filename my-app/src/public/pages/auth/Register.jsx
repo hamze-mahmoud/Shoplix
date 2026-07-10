@@ -1,12 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { gsap } from "gsap";
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Phone, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toastService } from "../../../Shared/services/toastService";
 import { authService } from "../../../Shared/services/authService";
-import SocialAuth from "./components/SocialAuth";
+import { AuthContext } from "../../../Shared/AuthContext";
 import AuthShell from "./components/AuthShell";
+import WhatsAppNote from "./components/WhatsAppNote";
+import OtpVerify from "./components/OtpVerify";
+
+import { normalizeLocalPhone, isValidMobile } from "./phoneUtils";
 
 // Password strength meter
 function PasswordStrength({ password }) {
@@ -70,20 +74,25 @@ export default function Register() {
   const { t } = useTranslation();
   const containerRef = useRef();
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  // +970 (Palestine) / +972 (Israel) prefix for the phone field.
+  const [countryCode, setCountryCode] = useState("970");
+  // After signup the account exists but is unverified — this holds the phone
+  // while the user enters the WhatsApp OTP.
+  const [pending, setPending] = useState(null);
 
   useEffect(() => {
     gsap.fromTo(
@@ -99,7 +108,8 @@ export default function Register() {
     const newErrors = {};
     if (!form.firstName.trim()) newErrors.firstName = "First name required";
     if (!form.lastName.trim()) newErrors.lastName = "Last name required";
-    if (!form.email.includes("@")) newErrors.email = "Invalid email";
+    if (!isValidMobile(normalizeLocalPhone(form.phone)))
+      newErrors.phone = t("auth.invalid_phone");
     if (form.password.length < 6) newErrors.password = "Min 6 characters";
     if (form.password !== form.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
@@ -108,41 +118,18 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Poll for email verification (no memory leaks)
-  const startVerificationCheck = (email) => {
-    setChecking(true);
-    let attempts = 0;
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await authService.checkIsVerified(email);
-
-        if (res.data.verified) {
-          clearInterval(interval);
-          setChecking(false);
-          navigate("/login?verified=true");
-        }
-
-        if (++attempts >= 60) {
-          clearInterval(interval);
-          setChecking(false);
-          toastService.warning(t("auth.verify_timeout"));
-        }
-      } catch {
-        // keep polling silently
-      }
-    }, 3000);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
     try {
-      const res = await authService.register(form);
-      toastService.success(res.data.message || t("auth.account_created", "Account created!"));
-      startVerificationCheck(form.email);
+      // Step 1: the account is created UNVERIFIED and a 6-digit code goes to
+      // the user's WhatsApp — switch to the code-entry step. The number is
+      // sent in full international form (+970/+972 + local).
+      const phone = `+${countryCode}${normalizeLocalPhone(form.phone)}`;
+      const res = await authService.register({ ...form, phone });
+      setPending({ phone: res.data.phone || phone });
     } catch (err) {
       const e = err.response?.data?.error;
       toastService.error(typeof e === "string" ? e : e?.message || t("auth.register_failed", "Registration failed"));
@@ -151,12 +138,28 @@ export default function Register() {
     }
   };
 
+  // Step 2 done: the backend confirmed the code and issued a session.
+  const handleVerified = (user, accessToken) => {
+    login(user, accessToken);
+    toastService.success(t("auth.account_created", "Account created!"));
+    navigate("/", { replace: true });
+  };
+
   return (
     <AuthShell>
       <div
         ref={containerRef}
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-white/10"
       >
+        {pending ? (
+          /* STEP 2 — WhatsApp code entry */
+          <OtpVerify
+            phone={pending.phone}
+            onVerified={handleVerified}
+            onBack={() => setPending(null)}
+          />
+        ) : (
+        <>
         {/* HEADER */}
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-extrabold text-gray-900">
@@ -165,13 +168,8 @@ export default function Register() {
           <p className="text-gray-500 text-sm">{t("auth.register_subtitle")}</p>
         </div>
 
-        {/* VERIFICATION BANNER */}
-        {checking && (
-          <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-xl">
-            <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-            <span>{t("auth.verify_email")}</span>
-          </div>
-        )}
+        {/* WhatsApp verification notice */}
+        <WhatsAppNote />
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -194,15 +192,38 @@ export default function Register() {
             />
           </div>
 
-          <InputField
-            icon={Mail}
-            name="email"
-            type="email"
-            placeholder={t("auth.email")}
-            value={form.email}
-            onChange={handleChange}
-            error={errors.email}
-          />
+          {/* PHONE — +970/+972 prefix + local mobile (row forced LTR:
+              phone numbers read left-to-right in Arabic/Hebrew too) */}
+          <div>
+            <div className="flex gap-2" dir="ltr">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                aria-label="Country code"
+                className="shrink-0 px-3 py-3 rounded-xl bg-gray-100 focus:bg-white border border-transparent focus:ring-2 focus:ring-green-400 outline-none transition text-sm font-semibold text-gray-700 cursor-pointer"
+              >
+                <option value="970">+970</option>
+                <option value="972">+972</option>
+              </select>
+              <div className="relative flex-1">
+                <Phone className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                <input
+                  name="phone"
+                  type="tel"
+                  dir="ltr"
+                  placeholder={t("auth.phone_placeholder")}
+                  value={form.phone}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl bg-gray-100 focus:bg-white border ${
+                    errors.phone ? "border-red-400" : "border-transparent"
+                  } focus:ring-2 focus:ring-green-400 outline-none transition text-sm`}
+                />
+              </div>
+            </div>
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
+          </div>
 
           <div>
             <InputField
@@ -247,7 +268,7 @@ export default function Register() {
 
           <button
             type="submit"
-            disabled={loading || checking}
+            disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-[#16A34A] text-white py-3 rounded-xl font-semibold shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -255,14 +276,14 @@ export default function Register() {
           </button>
         </form>
 
-        <SocialAuth />
-
         <p className="text-center text-sm text-gray-500">
           {t("auth.already_account")}{" "}
           <Link to="/login" className="text-green-600 font-semibold hover:underline">
             {t("auth.sign_in")}
           </Link>
         </p>
+        </>
+        )}
       </div>
     </AuthShell>
   );

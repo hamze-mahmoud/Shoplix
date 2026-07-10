@@ -1,14 +1,18 @@
 const Cart = require("../../models/Cart");
+const { resolveBundle } = require("../../utils/resolveBundle");
 
 exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({
       user: req.user.id,
-    }).populate("items.product");
+    })
+      .populate("items.product")
+      .populate({ path: "bundles.bundle", populate: { path: "items.product" } });
 
     if (!cart) {
       return res.json({
         items: [],
+        bundles: [],
         total: 0,
       });
     }
@@ -50,14 +54,32 @@ exports.getCart = async (req, res) => {
       })
       .filter(Boolean);
 
-    const total = items.reduce(
-      (sum, item) => sum + item.subtotal,
-      0
-    );
+    // Resolve bundle lines (drop any whose offer/products no longer exist).
+    const bundles = (cart.bundles || [])
+      .map((line) => {
+        const resolved = resolveBundle(line.bundle);
+        if (!resolved) return null;
+        const unit = line.price ?? resolved.offerPrice; // snapshot price wins
+        return {
+          bundleId: resolved._id,
+          title: resolved.title,
+          translations: resolved.translations, // localized bundle title
+          image: resolved.images?.[0] || resolved.products?.[0]?.image || null,
+          offerPrice: unit,
+          quantity: line.quantity,
+          subtotal: unit * line.quantity,
+          products: resolved.products,
+        };
+      })
+      .filter(Boolean);
+
+    const itemsTotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+    const bundlesTotal = bundles.reduce((sum, b) => sum + b.subtotal, 0);
 
     res.json({
       items,
-      total,
+      bundles,
+      total: itemsTotal + bundlesTotal,
     });
   } catch (err) {
     console.error("getCart error:", err);

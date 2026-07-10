@@ -15,6 +15,11 @@ const CategoryProductsPreview = lazy(() =>
 
 const SearchPage = lazy(() => import("../public/pages/search/SearchPage"));
 
+const OffersPage = lazy(() => import("../public/pages/offers/OffersPage"));
+const OfferDetails = lazy(() => import("../public/pages/offers/OfferDetails"));
+
+const TailoredPage = lazy(() => import("../public/pages/tailored/TailoredPage"));
+
 const About = lazy(() => import("../public/pages/About"));
 const Contact = lazy(() => import("../public/pages/Contact"));
 
@@ -58,6 +63,13 @@ const PublicRoutes = [
 
   /* SEARCH */
   { path: "/search", element: <SearchPage /> },
+
+  /* OFFERS */
+  { path: "/offers", element: <OffersPage /> },
+  { path: "/offers/:id", element: <OfferDetails /> },
+
+  /* TAILORED FOR YOU (AI picks by audience) */
+  { path: "/tailored", element: <TailoredPage /> },
 
   /* COMPANY */
   { path: "/about", element: <About /> },

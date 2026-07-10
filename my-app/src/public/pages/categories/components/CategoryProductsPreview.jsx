@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { categoryService } from "../../../../Shared/services/categoryService";
+import { localized } from "../../../../Shared/utils/localize";
 import CategoryBreadcrumb from "./CategoryBreadcrumb";
 import ProductCard from "../../products/components/listing/ProductCard";
 
@@ -17,7 +18,7 @@ const prefersReducedMotion = () =>
 
 export default function CategoryProductsPreview() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const heroRef = useRef(null);
   const gridRef = useRef(null);
 
@@ -109,12 +110,12 @@ export default function CategoryProductsPreview() {
                 </span>
 
                 <h1 data-hero className="font-display font-light text-5xl sm:text-7xl leading-[0.92] tracking-tight">
-                  {category?.name || t("categories.products")}
+                  {localized(category, "name", i18n.language) || category?.name || t("categories.products")}
                 </h1>
 
-                {category?.description && (
+                {(localized(category, "description", i18n.language) || category?.description) && (
                   <p data-hero className="mt-6 text-white/60 text-base sm:text-lg font-light max-w-xl leading-relaxed">
-                    {category.description}
+                    {localized(category, "description", i18n.language) || category.description}
                   </p>
                 )}
 

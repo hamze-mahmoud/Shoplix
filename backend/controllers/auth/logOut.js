@@ -1,6 +1,7 @@
 const RefreshToken = require(
   "../../models/RefreshToken"
 );
+const { clearCookieOptions } = require("../../utils/cookieOptions");
 
 module.exports = async function logout(
   req,
@@ -17,11 +18,7 @@ module.exports = async function logout(
 
     // Clear the cookie with the same attributes it was set with, otherwise
     // some browsers won't remove it.
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    res.clearCookie("refreshToken", clearCookieOptions());
 
     res.json({ success: true });
   } catch (err) {
