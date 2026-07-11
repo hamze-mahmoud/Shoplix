@@ -1,4 +1,5 @@
-const cloudinary = require('../config/cloudinary')
+const cloudinary = require('../../config/cloudinary')
+const Variant = require('../../models/Variant')
 
 const deleteVariant= async (req, res) => {
   try {
@@ -29,4 +30,4 @@ const deleteVariant= async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
-module.export= deleteVariant
+module.exports = deleteVariant
