@@ -45,15 +45,23 @@ connectDB();
 // Allow the configured frontend origin plus any localhost/127.0.0.1 dev origin
 // (Vite often falls back to a random port when 5173 is taken). Credentialed
 // requests can't use "*", so we reflect the request origin when it's allowed.
+// Compare origins without a trailing slash (browsers send none; env values
+// often include one) so a stray "/" never causes a CORS rejection.
+const stripSlash = (u) => (u || "").replace(/\/+$/, "");
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:5173",
-].filter(Boolean);
+].filter(Boolean).map(stripSlash);
 
-const isAllowedOrigin = (origin) =>
-  !origin || // same-origin / curl / server-to-server
-  allowedOrigins.includes(origin) ||
-  /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // same-origin / curl / server-to-server
+  const o = stripSlash(origin);
+  return (
+    allowedOrigins.includes(o) ||
+    /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(o) ||
+    /\.vercel\.app$/.test(o) // any Vercel deployment (production + previews)
+  );
+};
 
 const corsOptions = {
   origin: (origin, cb) =>
