@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useDebounce } from "../../../../shared/hooks/useDebounce";
-import { searchService } from "../../../../shared/services/searchService";
+import { useDebounce } from "../../../../Shared/hooks/useDebounce";
+import { searchService } from "../../../../Shared/services/searchService";
 
 export default function SearchBar({ onSearch }) {
   const { t } = useTranslation();

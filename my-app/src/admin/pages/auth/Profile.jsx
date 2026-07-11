@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../../shared/hooks/useAuth";
+import { useAuth } from "../../../Shared/hooks/useAuth";
 
 export default function Profile() {
   const { user, logout } = useAuth();

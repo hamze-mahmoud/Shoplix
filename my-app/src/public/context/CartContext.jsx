@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 
-import { cartService } from "../../Shared/Services/cartService";
+import { cartService } from "../../Shared/services/cartService";
 import { toastService } from "../../Shared/services/toastService";
 import { guestCart } from "../../Shared/utils/guestCart";
 import { salePrice } from "../../Shared/utils/pricing";

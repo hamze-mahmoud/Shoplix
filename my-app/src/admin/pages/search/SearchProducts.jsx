@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
-import { searchService } from "../../../shared/services/searchService";
+import { searchService } from "../../../Shared/services/searchService";
 
 export default function SearchProducts() {
   const { t } = useTranslation();
