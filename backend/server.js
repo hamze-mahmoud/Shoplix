@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const path = require("path");
@@ -31,6 +32,12 @@ const server = http.createServer(app);
 // Behind Render/Vercel's TLS-terminating proxy: trust the X-Forwarded-* headers
 // so `secure` cookies (SameSite=None) are honored in production.
 app.set("trust proxy", 1);
+
+// Security headers (HSTS, no-sniff, clickjacking protection, referrer policy…).
+// This is a JSON API whose assets live on Vercel, so the strict CSP that would
+// block cross-origin resources isn't needed here — disable just that directive.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
+app.disable("x-powered-by"); // don't advertise the framework
 
 const PORT = process.env.PORT || 3000;
 
@@ -193,6 +200,16 @@ io.on("connection", (socket) => {
 // =======================
 app.use((err, req, res, next) => {
   console.error(err);
+
+  // Malformed ObjectId / bad query value → client error, not a 500.
+  if (err.name === "CastError" || err.name === "ValidationError") {
+    return res.status(400).json({ error: "Invalid request" });
+  }
+
+  // Rejected by CORS → 403 (not a generic 500).
+  if (/Origin not allowed by CORS/.test(err.message || "")) {
+    return res.status(403).json({ error: "Origin not allowed" });
+  }
 
   res.status(500).json({
     error: "Internal Server Error",

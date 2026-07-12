@@ -17,8 +17,8 @@ module.exports = async function signUp(req, res) {
     return res.status(400).json({ error: 'Please enter a valid phone number' })
   }
 
-  if (String(password).length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters' })
+  if (String(password).length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' })
   }
 
   try {

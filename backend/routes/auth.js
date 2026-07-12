@@ -4,14 +4,17 @@ const authCtrl = require('../controllers/auth')
 const auth = require('../middleware/authMiddleware')
 const rateLimit = require('../utils/rateLimit')
 
-// Sensitive endpoints share one limiter: 30 requests / 5 min per IP per
-// endpoint. Protects against credential brute force and WhatsApp-send abuse
-// (each send costs money on a real number).
+// General limiter for sensitive endpoints: 30 requests / 5 min per IP per
+// endpoint (WhatsApp OTP resends etc. — each send costs money on a real number).
 const authLimiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 30 })
+
+// Stricter limiter for the credential endpoints most targeted by brute force:
+// 8 attempts / 10 min per IP. Legit users rarely fail this many times.
+const loginLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 8 })
 
 // public
 router.post("/signup", authLimiter, authCtrl.signUp);
-router.post("/signin", authLimiter, authCtrl.signIn);
+router.post("/signin", loginLimiter, authCtrl.signIn);
 
 // WhatsApp OTP: confirm the 6-digit signup code / re-send it
 router.post("/verify-otp", authLimiter, authCtrl.verifyOtp);
@@ -19,7 +22,7 @@ router.post("/resend-otp", authLimiter, authCtrl.resendOtp);
 
 // Forgot password: WhatsApp reset code → new password (+ fresh session)
 router.post("/forgot-password", authLimiter, authCtrl.forgotPassword);
-router.post("/reset-password", authLimiter, authCtrl.resetPassword);
+router.post("/reset-password", loginLimiter, authCtrl.resetPassword);
 
 router.get("/verify-email", authCtrl.verifyEmail);
 
