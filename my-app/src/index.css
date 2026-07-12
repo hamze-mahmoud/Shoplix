@@ -147,3 +147,9 @@ html {
   from { transform: scaleX(1); }
   to { transform: scaleX(0); }
 }
+
+/* Subtle moving sheen across the top promo strip */
+@keyframes promo-sheen {
+  from { transform: translateX(-60%); }
+  to { transform: translateX(60%); }
+}

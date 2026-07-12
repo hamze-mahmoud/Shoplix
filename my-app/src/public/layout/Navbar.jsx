@@ -19,6 +19,7 @@ import SearchBar from "../pages/search/components/SearchBar";
 import useAuth from "../../Shared/hooks/useAuth";
 import NotificationBell from "../../Shared/components/notifications/NotificationBell";
 import AddedToCartPopover from "./AddedToCartPopover";
+import PromoBar from "./PromoBar";
 
 const LANGUAGES = [
   { code: "en", label: "EN", name: "English" },
@@ -40,6 +41,7 @@ export default function Navbar() {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidePromo, setHidePromo] = useState(false);
 
   const headerRef = useRef(null);
   const dotRef = useRef(null);
@@ -66,9 +68,12 @@ export default function Navbar() {
     setShowLangMenu(false);
   };
 
-  // Scroll condense + shadow
+  // Scroll condense + shadow; tuck the promo strip away once browsing.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 10);
+      setHidePromo(window.scrollY > 80);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -173,6 +178,9 @@ export default function Navbar() {
           : "bg-white/70 border-b border-transparent"
       }`}
     >
+      {/* dynamic rotating promo strip — offers, countdown, personalized picks */}
+      <PromoBar collapsed={hidePromo} />
+
       {/* subtle green accent hairline when scrolled */}
       <span
         className={`pointer-events-none absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent transition-opacity duration-300 ${
