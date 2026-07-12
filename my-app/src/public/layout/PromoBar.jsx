@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Flame, Truck, Sparkles, ArrowRight, MessageCircle } from "lucide-react";
+import { Flame, Sparkles, ArrowRight, MessageCircle } from "lucide-react";
 import gsap from "gsap";
 
 import { offerService } from "../../Shared/services/offerService";
@@ -34,7 +34,6 @@ export default function PromoBar({ collapsed = false }) {
   const slides = [
     ...offers.map((o) => ({ type: "offer", offer: o })),
     { type: "tailored" },
-    { type: "shipping" },
     { type: "whatsapp" },
   ];
 
@@ -94,16 +93,6 @@ export default function PromoBar({ collapsed = false }) {
               <Sparkles className="w-4 h-4 text-emerald-300 shrink-0" />
               <span className="font-semibold">{t("promo.tailored", "Products picked just for you")}</span>
               <span className="hidden sm:inline opacity-80">{t("promo.tailored_cta", "Discover your personalized picks")}</span>
-            </>
-          ),
-        };
-      case "shipping":
-        return {
-          to: "/products",
-          node: (
-            <>
-              <Truck className="w-4 h-4 text-emerald-300 shrink-0" />
-              <span className="font-semibold">{t("promo.free_shipping", "Free shipping on orders over ₪200")}</span>
             </>
           ),
         };

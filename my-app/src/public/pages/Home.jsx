@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, ShieldCheck, Truck, BadgeCheck, Lock } from "lucide-react";
+import { ArrowRight, ShieldCheck, BadgeCheck, Lock } from "lucide-react";
 
 import Reveal from "../../Shared/components/Reveal";
 import HeroSlider from "../components/HeroSlider";
@@ -94,7 +94,6 @@ export default function Home() {
   const slides = bannerSlides.length ? bannerSlides : fallbackSlides;
 
   const trust = [
-    { icon: Truck, label: t("home.trust_shipping") },
     { icon: BadgeCheck, label: t("home.trust_authentic") },
     { icon: ShieldCheck, label: t("home.trust_warranty") },
     { icon: Lock, label: t("home.trust_secure") },
@@ -119,7 +118,7 @@ export default function Home() {
 
       {/* ================= TRUST ================= */}
       <section className="border-y border-black/10 bg-white">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 divide-x divide-black/10">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-3 divide-x divide-black/10">
           {trust.map(({ icon: Icon, label }, i) => (
             <div key={i} className="flex items-center justify-center gap-3 py-6">
               <Icon className="w-4 h-4 text-green-600" />
@@ -296,7 +295,7 @@ export default function Home() {
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {trust.map(({ icon: Icon, label }, i) => (
               <div
                 key={i}

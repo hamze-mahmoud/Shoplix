@@ -93,6 +93,12 @@ export default function SpecialOffers() {
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#0b1120] via-[#0b1120]/30 to-[#0b1120]" />
       <div className="absolute inset-x-0 bottom-0 h-40 pointer-events-none bg-gradient-to-t from-[#0b1120] to-transparent" />
 
+      {/* aurora glows — rich color washes over the dark stage */}
+      <div className="absolute -top-40 -end-40 w-[42rem] h-[42rem] rounded-full bg-blue-600/25 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] start-[-12%] w-[38rem] h-[38rem] rounded-full bg-emerald-500/20 blur-[130px] pointer-events-none" />
+      <div className="absolute top-1/4 start-1/3 w-[26rem] h-[26rem] rounded-full bg-violet-600/15 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[55%] end-[18%] w-[20rem] h-[20rem] rounded-full bg-amber-400/[0.08] blur-[110px] pointer-events-none" />
+
       <div className="relative max-w-7xl mx-auto px-6 sm:px-10">
         {/* HEADER */}
         <div data-so-head className="flex flex-wrap items-end justify-between gap-6 mb-10 sm:mb-14">
