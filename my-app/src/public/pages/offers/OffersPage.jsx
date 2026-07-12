@@ -8,6 +8,7 @@ import { formatPrice } from "../../../Shared/utils/formPrice";
 import { onImgError } from "../../../Shared/utils/imageFallback";
 import { localized } from "../../../Shared/utils/localize";
 import Reveal from "../../../Shared/components/Reveal";
+import Countdown from "../../../Shared/components/Countdown";
 
 export default function OffersPage() {
   const { t, i18n } = useTranslation();
@@ -70,6 +71,13 @@ export default function OffersPage() {
                         -{o.savingsPercent}%
                       </span>
                     )}
+                    {/* ⏰ urgency: live countdown to offer end */}
+                    <Countdown
+                      until={o.endDate}
+                      mode="chip"
+                      variant="light"
+                      className="absolute bottom-4 start-4"
+                    />
                   </div>
 
                   <div className="p-5">

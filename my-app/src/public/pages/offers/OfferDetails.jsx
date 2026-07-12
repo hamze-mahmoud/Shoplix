@@ -8,6 +8,7 @@ import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../../Shared/utils/formPrice";
 import { onImgError } from "../../../Shared/utils/imageFallback";
 import { localized } from "../../../Shared/utils/localize";
+import Countdown from "../../../Shared/components/Countdown";
 
 export default function OfferDetails() {
   const { id } = useParams();
@@ -125,6 +126,9 @@ export default function OfferDetails() {
                 </>
               )}
             </div>
+
+            {/* ⏰ urgency: live countdown to offer end */}
+            <Countdown until={offer.endDate} mode="boxes" className="mt-5" />
 
             {/* QTY + ADD */}
             <div className="mt-8 flex items-center gap-4">

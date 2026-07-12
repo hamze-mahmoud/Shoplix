@@ -8,6 +8,7 @@ import { offerService } from "../../Shared/services/offerService";
 import { formatPrice } from "../../Shared/utils/formPrice";
 import { localized } from "../../Shared/utils/localize";
 import { onImgError } from "../../Shared/utils/imageFallback";
+import Countdown from "../../Shared/components/Countdown";
 
 // three.js backdrop lives in its own lazy chunk
 const OffersBackground3D = lazy(() => import("./OffersBackground3D"));
@@ -141,6 +142,13 @@ export default function SpecialOffers() {
                     -{o.savingsPercent}%
                   </span>
                 )}
+                {/* ⏰ urgency: live countdown to offer end */}
+                <Countdown
+                  until={o.endDate}
+                  mode="chip"
+                  variant="dark"
+                  className="absolute bottom-3 start-3"
+                />
               </div>
 
               <div className="p-5">
