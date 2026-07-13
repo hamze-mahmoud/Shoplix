@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { localized } from "../../../Shared/utils/localize";
 import { onImgError } from "../../../Shared/utils/imageFallback";
 import { formatPrice } from "../../../Shared/utils/formPrice";
-import { getShippingCost } from "../../../Shared/utils/shipping";
+import { computeDelivery } from "../../../Shared/utils/shipping";
 
 export default function OrderReview({ cart, shippingAddress, onPlaceOrder, loading }) {
   const { t, i18n } = useTranslation();
@@ -12,7 +12,10 @@ export default function OrderReview({ cart, shippingAddress, onPlaceOrder, loadi
   const itemsTotal = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
   const hasRegion = !!shippingAddress?.region;
-  const shippingCost = hasRegion ? getShippingCost(shippingAddress.region) : 0;
+  // Size-aware delivery: base region fee × each item's size multiplier × qty.
+  const shippingCost = hasRegion
+    ? computeDelivery(cart.items, shippingAddress.region)
+    : 0;
   const grandTotal = itemsTotal + shippingCost;
 
   return (

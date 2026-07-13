@@ -1,19 +1,17 @@
 // Delivery-fee calculation (mirrors backend utils/delivery.js so the quote the
 // customer sees matches what they're charged).
 //
-// Base fee is region-based: ₪20 normally, ₪70 for the remote regions. Each item
-// then multiplies that base by its variant SIZE tier:
+// Base fee is per region: West Bank ₪20, Jerusalem ₪30, Palestinian Territories
+// 1948 ₪70. Each item then multiplies that base by its variant SIZE tier:
 //   under_1m (< 1m×1m) → ×1 · 1m (1m×1m) → ×1.5 · over_1m (>1m×1m) → ×2
 // Order delivery = Σ over items of  base × sizeMultiplier × quantity.
 
-export const SHIPPING_FLAT = 20;
-export const SHIPPING_REMOTE = 70;
-export const REMOTE_REGIONS = ["jerusalem", "insidePalestine"];
+export const REGION_FEE = { westBank: 20, jerusalem: 30, insidePalestine: 70 };
+const DEFAULT_FEE = 20;
 
 export const SIZE_MULTIPLIER = { under_1m: 1, "1m": 1.5, over_1m: 2 };
 
-export const baseDeliveryFee = (region) =>
-  REMOTE_REGIONS.includes(region) ? SHIPPING_REMOTE : SHIPPING_FLAT;
+export const baseDeliveryFee = (region) => REGION_FEE[region] ?? DEFAULT_FEE;
 
 export const sizeMultiplier = (size) => SIZE_MULTIPLIER[size] ?? 1;
 

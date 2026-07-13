@@ -81,6 +81,10 @@
     "news_sub": "Early access to new arrivals and private offers.",
     "news_placeholder": "Your email address",
     "news_cta": "Subscribe",
+    "cta_title": "Ready to find something you'll love?",
+    "cta_sub": "Explore the full collection, or grab a limited-time bundle before it's gone.",
+    "cta_shop": "Shop all products",
+    "cta_offers": "View offers",
     "sale_kicker": "Limited time · Season offers",
     "sale_title": "The season",
     "sale_title2": "sale.",
@@ -262,7 +266,7 @@
     "hebron": "Hebron",
     "bethlehem": "Bethlehem",
     "jericho": "Jericho",
-    "insidePalestine": "Inside Palestine (48)"
+    "insidePalestine": "Palestinian Territories 1948"
   },
   "orders": {
     "title": "My Orders",

@@ -5,9 +5,7 @@ const PAYMENT_METHODS = [
   { value: "cash_on_delivery", icon: Truck, labelKey: "cash_on_delivery", descKey: "cash_desc" },
 ];
 
-const REGIONS = [
-  "westBank", "jerusalem", "hebron", "bethlehem", "jericho", "insidePalestine",
-];
+const REGIONS = ["westBank", "jerusalem", "insidePalestine"];
 
 export default function PaymentMethod({
   paymentMethod, setPaymentMethod,

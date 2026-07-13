@@ -318,29 +318,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= NEWSLETTER ================= */}
+      {/* ================= FINAL CTA ================= */}
       <section className="relative overflow-hidden bg-[#111827] text-white">
         <div className="absolute -top-24 -end-24 w-96 h-96 bg-green-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -start-24 w-96 h-96 bg-green-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative max-w-3xl mx-auto px-6 py-16 sm:py-28 text-center">
           <Reveal>
-            <h2 className="text-3xl sm:text-5xl font-light">
-              {t("home.news_title")}
+            <h2 className="font-display text-3xl sm:text-5xl font-light">
+              {t("home.cta_title")}
             </h2>
-            <p className="mt-4 text-white/60">
-              {t("home.news_sub")}
+            <p className="mt-4 text-white/60 max-w-xl mx-auto">
+              {t("home.cta_sub")}
             </p>
 
-            <form className="mt-10 flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder={t("home.news_placeholder")}
-                className="flex-1 px-5 py-4 bg-white/5 border border-white/10 focus:border-green-400/60 outline-none rounded-xl"
-              />
-              <button className="btn-press px-6 py-4 bg-green-500 text-white uppercase text-xs tracking-[0.2em] font-semibold hover:bg-green-400 hover:text-[#111827] transition-colors rounded-xl">
-                {t("home.news_cta")}
-              </button>
-            </form>
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/products"
+                className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-400 hover:text-[#111827] transition-colors"
+              >
+                {t("home.cta_shop")}
+                <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+              </Link>
+              <Link
+                to="/offers"
+                className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-white/25 text-sm font-semibold hover:bg-white hover:text-[#111827] transition-colors"
+              >
+                {t("home.cta_offers")}
+              </Link>
+            </div>
           </Reveal>
         </div>
       </section>
