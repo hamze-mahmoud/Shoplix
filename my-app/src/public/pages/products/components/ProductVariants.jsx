@@ -32,6 +32,9 @@ export default function ProductVariants({ product, setSelectedV }) {
 
   const isOutOfStock = (v) => (v.stock || 0) === 0;
   const isLowStock = (v) => (v.stock || 0) > 0 && (v.stock || 0) <= 5;
+  // Dimensions stay hidden for normal items; only surfaced for oversized ones
+  // (any side over 2 m) so shoppers know it's a large item before ordering.
+  const isOversized = (v) => Number(v?.widthCm) > 200 || Number(v?.heightCm) > 200;
 
   return (
     <div className="space-y-4">
@@ -103,6 +106,20 @@ export default function ProductVariants({ product, setSelectedV }) {
               <span className="text-green-600 font-medium">{t("products.in_stock")}</span>
             )}
           </div>
+
+          {/* Oversized-item dimensions (only shown when a side exceeds 2 m) */}
+          {isOversized(selected) && (
+            <>
+              <div className="w-px h-4 bg-gray-300" />
+              <span
+                dir="ltr"
+                className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-xs"
+                title={t("products.large_item")}
+              >
+                📦 {selected.widthCm} × {selected.heightCm} cm
+              </span>
+            </>
+          )}
         </div>
       )}
     </div>

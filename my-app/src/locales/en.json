@@ -133,6 +133,7 @@
     "in_stock": "In stock",
     "out_of_stock": "Out of stock",
     "low_stock": "Only {{count}} left",
+    "large_item": "Large item — dimensions shown for delivery",
     "zoom_hint": "Click to zoom",
     "max_in_cart": "Max available in cart",
     "quantity": "Quantity",
