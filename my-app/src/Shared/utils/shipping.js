@@ -2,27 +2,33 @@
 // customer sees matches what they're charged).
 //
 // Base fee is per region: West Bank ₪20, Jerusalem ₪30, Palestinian Territories
-// 1948 ₪70. Each item then multiplies that base by its variant SIZE tier:
-//   under_1m (< 1m×1m) → ×1 · 1m (1m×1m) → ×1.5 · over_1m (>1m×1m) → ×2
-// Order delivery = Σ over items of  base × sizeMultiplier × quantity.
+// 1948 ₪70. The WHOLE order then gets ONE size multiplier from its combined
+// area (Σ width×height×qty, cm²) vs one square metre:
+//   < 1 m² → ×1 · 1–2 m² → ×1.5 · ≥ 2 m² → ×2
+// delivery = regionBase × orderMultiplier.
 
 export const REGION_FEE = { westBank: 20, jerusalem: 30, insidePalestine: 70 };
 const DEFAULT_FEE = 20;
-
-export const SIZE_MULTIPLIER = { under_1m: 1, "1m": 1.5, over_1m: 2 };
+const ONE_SQ_METRE_CM2 = 100 * 100; // 10,000 cm²
 
 export const baseDeliveryFee = (region) => REGION_FEE[region] ?? DEFAULT_FEE;
 
-export const sizeMultiplier = (size) => SIZE_MULTIPLIER[size] ?? 1;
+export const orderSizeMultiplier = (totalAreaCm2) => {
+  const m2 = totalAreaCm2 / ONE_SQ_METRE_CM2;
+  if (m2 < 1) return 1;
+  if (m2 < 2) return 1.5;
+  return 2;
+};
 
-// Back-compat: the base region fee for a single unit at the smallest size.
-export const getShippingCost = (region) => baseDeliveryFee(region);
-
-// items: [{ size, quantity }] → total delivery fee for the whole cart.
+// items: [{ widthCm, heightCm, quantity }] → single delivery fee for the order.
 export const computeDelivery = (items = [], region) => {
-  const base = baseDeliveryFee(region);
-  return items.reduce(
-    (sum, it) => sum + base * sizeMultiplier(it.size) * (it.quantity || 1),
+  const totalArea = items.reduce(
+    (sum, it) =>
+      sum + (Number(it.widthCm) || 0) * (Number(it.heightCm) || 0) * (it.quantity || 1),
     0
   );
+  return baseDeliveryFee(region) * orderSizeMultiplier(totalArea);
 };
+
+// Back-compat: the region base fee alone.
+export const getShippingCost = (region) => baseDeliveryFee(region);

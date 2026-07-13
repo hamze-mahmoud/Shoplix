@@ -19,13 +19,11 @@ const variantSchema = new mongoose.Schema({
   costPrice: Number,  // cost to acquire — used for profit/margin analytics
   stock: Number,
   images: [String],
-  // Physical size tier — drives the delivery fee (see utils/delivery.js):
-  //   under_1m → ×1 · 1m (1m×1m) → ×1.5 · over_1m (>1m×1m) → ×2
-  size: {
-    type: String,
-    enum: ["under_1m", "1m", "over_1m"],
-    default: "under_1m",
-  },
+  // Physical dimensions in centimetres (10–500). The whole order's combined
+  // area (Σ width×height×qty) drives the delivery multiplier — see
+  // utils/delivery.js. Legacy variants with no dimensions count as 0 area.
+  widthCm: { type: Number, default: 0, min: 0, max: 500 },
+  heightCm: { type: Number, default: 0, min: 0, max: 500 },
 });
 
 // Per-language localized text. `name`/`description` below stay as the canonical

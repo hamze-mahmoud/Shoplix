@@ -87,7 +87,8 @@ module.exports = async function createOrder(req, res) {
     let subtotal = 0;
 
     const items = [];
-    // { size, quantity } per physical unit — drives the size-based delivery fee
+    // { widthCm, heightCm, quantity } per unit — drives the order's size-based
+    // delivery fee (combined area → one multiplier). See utils/delivery.js.
     const deliveryItems = [];
 
     // Validate stock + build localized snapshots
@@ -95,7 +96,7 @@ module.exports = async function createOrder(req, res) {
       const product = cartItem.product;
       const variant = product.variants.id(cartItem.variantId);
 
-      deliveryItems.push({ size: variant.size, quantity: cartItem.quantity });
+      deliveryItems.push({ widthCm: variant.widthCm, heightCm: variant.heightCm, quantity: cartItem.quantity });
 
       if (variant.stock < cartItem.quantity) {
         return res.status(400).json({
@@ -150,7 +151,7 @@ module.exports = async function createOrder(req, res) {
           });
         }
         const neededQty = (bItem.quantity || 1) * bundleQty;
-        deliveryItems.push({ size: bVariant.size, quantity: neededQty });
+        deliveryItems.push({ widthCm: bVariant.widthCm, heightCm: bVariant.heightCm, quantity: neededQty });
         if (bVariant.stock < neededQty) {
           return res.status(400).json({
             success: false,

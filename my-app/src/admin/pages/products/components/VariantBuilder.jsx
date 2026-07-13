@@ -57,7 +57,8 @@ export default function VariantBuilder({ variants, setVariants }) {
         price: "",
         costPrice: "",
         stock: "",
-        size: "under_1m",
+        widthCm: "",
+        heightCm: "",
         images: [],
       },
     ]);
@@ -107,20 +108,40 @@ export default function VariantBuilder({ variants, setVariants }) {
             />
           </div>
 
-          {/* Size → delivery fee. under_1m ×1 · 1m ×1.5 · over_1m ×2 */}
+          {/* Physical size in cm (10–500) → drives the order's delivery fee */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("admin.products.size_label", "Size (affects delivery fee)")}
+              {t("admin.products.dimensions_label", "Size (cm) — affects delivery fee")}
             </label>
-            <select
-              value={variant.size || "under_1m"}
-              onChange={(e) => handleChange(i, "size", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none bg-white"
-            >
-              <option value="under_1m">{t("admin.products.size_under_1m", "Under 1m×1m — standard delivery (×1)")}</option>
-              <option value="1m">{t("admin.products.size_1m", "1m×1m — delivery ×1.5")}</option>
-              <option value="over_1m">{t("admin.products.size_over_1m", "Larger than 1m×1m — delivery ×2")}</option>
-            </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative">
+                <input
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={variant.widthCm ?? ""}
+                  onChange={(e) => handleChange(i, "widthCm", Number(e.target.value))}
+                  placeholder={t("admin.products.width", "Width")}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pe-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                />
+                <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">cm</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={variant.heightCm ?? ""}
+                  onChange={(e) => handleChange(i, "heightCm", Number(e.target.value))}
+                  placeholder={t("admin.products.height", "Height")}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pe-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                />
+                <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">cm</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {t("admin.products.dimensions_hint", "Delivery is based on the whole order's combined size: under 1m² ×1 · 1–2m² ×1.5 · over 2m² ×2.")}
+            </p>
           </div>
 
           {/* Live margin / profit-per-unit hint */}
