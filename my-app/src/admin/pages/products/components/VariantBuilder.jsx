@@ -57,6 +57,7 @@ export default function VariantBuilder({ variants, setVariants }) {
         price: "",
         costPrice: "",
         stock: "",
+        size: "under_1m",
         images: [],
       },
     ]);
@@ -104,6 +105,22 @@ export default function VariantBuilder({ variants, setVariants }) {
               value={variant.stock}
               onChange={(e) => handleChange(i, "stock", Number(e.target.value))}
             />
+          </div>
+
+          {/* Size → delivery fee. under_1m ×1 · 1m ×1.5 · over_1m ×2 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("admin.products.size_label", "Size (affects delivery fee)")}
+            </label>
+            <select
+              value={variant.size || "under_1m"}
+              onChange={(e) => handleChange(i, "size", e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none bg-white"
+            >
+              <option value="under_1m">{t("admin.products.size_under_1m", "Under 1m×1m — standard delivery (×1)")}</option>
+              <option value="1m">{t("admin.products.size_1m", "1m×1m — delivery ×1.5")}</option>
+              <option value="over_1m">{t("admin.products.size_over_1m", "Larger than 1m×1m — delivery ×2")}</option>
+            </select>
           </div>
 
           {/* Live margin / profit-per-unit hint */}

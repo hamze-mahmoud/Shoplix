@@ -19,6 +19,13 @@ const variantSchema = new mongoose.Schema({
   costPrice: Number,  // cost to acquire — used for profit/margin analytics
   stock: Number,
   images: [String],
+  // Physical size tier — drives the delivery fee (see utils/delivery.js):
+  //   under_1m → ×1 · 1m (1m×1m) → ×1.5 · over_1m (>1m×1m) → ×2
+  size: {
+    type: String,
+    enum: ["under_1m", "1m", "over_1m"],
+    default: "under_1m",
+  },
 });
 
 // Per-language localized text. `name`/`description` below stay as the canonical

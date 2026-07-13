@@ -4,6 +4,7 @@ const Product = require("../../models/Product");
 const notifyOrder = require("../../utils/notifyOrder");
 const { resolveCost } = require("../../config/finance");
 const { salePrice } = require("../../utils/pricing");
+const { computeDelivery } = require("../../utils/delivery");
 const { cache } = require("../../config/cache");
 
 // Orders arrive within a maximum of 7 days from creation.
@@ -86,11 +87,15 @@ module.exports = async function createOrder(req, res) {
     let subtotal = 0;
 
     const items = [];
+    // { size, quantity } per physical unit — drives the size-based delivery fee
+    const deliveryItems = [];
 
     // Validate stock + build localized snapshots
     for (const cartItem of validCartItems) {
       const product = cartItem.product;
       const variant = product.variants.id(cartItem.variantId);
+
+      deliveryItems.push({ size: variant.size, quantity: cartItem.quantity });
 
       if (variant.stock < cartItem.quantity) {
         return res.status(400).json({
@@ -145,6 +150,7 @@ module.exports = async function createOrder(req, res) {
           });
         }
         const neededQty = (bItem.quantity || 1) * bundleQty;
+        deliveryItems.push({ size: bVariant.size, quantity: neededQty });
         if (bVariant.stock < neededQty) {
           return res.status(400).json({
             success: false,
@@ -187,12 +193,9 @@ module.exports = async function createOrder(req, res) {
       });
     }
 
-    // Shipping calculation (ILS). Flat 20 everywhere except Jerusalem and
-    // inside Palestine ('48), which cost 70.
-    const REMOTE_REGIONS = ["jerusalem", "insidePalestine"];
-    const shippingCost = REMOTE_REGIONS.includes(shippingAddress.region)
-      ? 70
-      : 20;
+    // Delivery fee: region base (₪20, or ₪70 remote) × each item's size
+    // multiplier × quantity, summed. See utils/delivery.js.
+    const shippingCost = computeDelivery(deliveryItems, shippingAddress.region);
 
     const totalPrice =
       subtotal + shippingCost;

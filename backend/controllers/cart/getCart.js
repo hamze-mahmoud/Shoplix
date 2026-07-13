@@ -37,6 +37,7 @@ exports.getCart = async (req, res) => {
 
           color: variant.color,
           storage: variant.storage,
+          size: variant.size,                          // size tier → delivery fee
           variantTranslations: variant.translations,  // localized color/storage
           stock: variant.stock,                        // available stock (quantity cap)
 
