@@ -5,6 +5,8 @@ module.exports = {
   resendOtp: require('./resendOtp'),
   forgotPassword: require('./forgotPassword'),
   resetPassword: require('./resetPassword'),
+  waStart: require('./waVerify').waStart,
+  waStatus: require('./waVerify').waStatus,
   verifyEmail: require('./verifyEmail'),
   checkIsVerified: require('./checkIsVerified'),
   getMe: require('./getMe'),

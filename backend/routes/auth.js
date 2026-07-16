@@ -20,6 +20,12 @@ router.post("/signin", loginLimiter, authCtrl.signIn);
 router.post("/verify-otp", authLimiter, authCtrl.verifyOtp);
 router.post("/resend-otp", authLimiter, authCtrl.resendOtp);
 
+// WhatsApp "tap-to-verify" signup: customer sends a code from their number to
+// prove ownership (no template / business verification needed). wa-start creates
+// the pending account + code; the page polls wa-status until the webhook matches.
+router.post("/wa-start", authLimiter, authCtrl.waStart);
+router.get("/wa-status", authCtrl.waStatus);
+
 // Forgot password: WhatsApp reset code → new password (+ fresh session)
 router.post("/forgot-password", authLimiter, authCtrl.forgotPassword);
 router.post("/reset-password", loginLimiter, authCtrl.resetPassword);

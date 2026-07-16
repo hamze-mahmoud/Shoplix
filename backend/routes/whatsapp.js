@@ -4,6 +4,7 @@ const { protect, admin } = require("../middleware/authMiddleware");
 const { handleIncomingMessage } = require("../services/concierge");
 const { downloadMedia, sendText } = require("../services/whatsapp");
 const { transcribeAudio, isTranscriptionConfigured } = require("../services/transcribe");
+const { tryMatchVerification } = require("../controllers/auth/waVerify");
 
 // A voice note (type "audio") is downloaded, transcribed, then fed into the
 // SAME concierge brain as a typed message. Runs off the request thread.
@@ -90,12 +91,24 @@ router.post("/webhook", (req, res) => {
           // Typed text.
           if (msg.type === "text" && msg.text?.body) {
             const text = msg.text.body;
-            console.log(`Concierge ← +${from}: ${text}`);
-            setImmediate(() =>
-              handleIncomingMessage({ from, text }).catch((e) =>
-                console.error("concierge handling failed:", e.message)
-              )
-            );
+            setImmediate(async () => {
+              try {
+                // A signup verification code takes priority over the concierge.
+                const isVerification = await tryMatchVerification(from, text);
+                if (isVerification) {
+                  await sendText(
+                    from,
+                    "✅ تم التحقق من رقمك بنجاح! يمكنك العودة إلى المتجر الآن.\n" +
+                      "✅ Your number is verified! You can return to the store now."
+                  ).catch(() => {});
+                  return;
+                }
+                console.log(`Concierge ← +${from}: ${text}`);
+                await handleIncomingMessage({ from, text });
+              } catch (e) {
+                console.error("inbound handling failed:", e.message);
+              }
+            });
           }
         }
       }

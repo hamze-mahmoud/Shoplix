@@ -24,6 +24,12 @@ export const authService = {
   forgotPassword: (data) => api.post("/auth/forgot-password", data),
   resetPassword: (data) => api.post("/auth/reset-password", data),
 
+  // WhatsApp "tap-to-verify" signup: waStart creates the pending account +
+  // returns { token, code, waLink }; poll waStatus until { verified, user,
+  // accessToken } (customer proved ownership by messaging the business number).
+  waStart: (data) => api.post("/auth/wa-start", data),
+  waStatus: (token) => api.get("/auth/wa-status", { params: { token } }),
+
   getMe: () => api.get("/auth/me"),
 
   // Exchange the httpOnly refresh cookie for a fresh access token.

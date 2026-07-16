@@ -8,7 +8,7 @@ import { authService } from "../../../Shared/services/authService";
 import { AuthContext } from "../../../Shared/AuthContext";
 import AuthShell from "./components/AuthShell";
 import WhatsAppNote from "./components/WhatsAppNote";
-import OtpVerify from "./components/OtpVerify";
+import WhatsAppTapVerify from "./components/WhatsAppTapVerify";
 
 import { normalizeLocalPhone, isValidMobile } from "./phoneUtils";
 
@@ -124,12 +124,11 @@ export default function Register() {
 
     setLoading(true);
     try {
-      // Step 1: the account is created UNVERIFIED and a 6-digit code goes to
-      // the user's WhatsApp — switch to the code-entry step. The number is
-      // sent in full international form (+970/+972 + local).
+      // Step 1: create the account UNVERIFIED and get a code the customer sends
+      // to our WhatsApp to prove ownership (tap-to-verify — no OTP send needed).
       const phone = `+${countryCode}${normalizeLocalPhone(form.phone)}`;
-      const res = await authService.register({ ...form, phone });
-      setPending({ phone: res.data.phone || phone });
+      const res = await authService.waStart({ ...form, phone });
+      setPending(res.data); // { token, code, waLink, businessNumber }
     } catch (err) {
       const e = err.response?.data?.error;
       toastService.error(typeof e === "string" ? e : e?.message || t("auth.register_failed", "Registration failed"));
@@ -152,9 +151,9 @@ export default function Register() {
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-white/10"
       >
         {pending ? (
-          /* STEP 2 — WhatsApp code entry */
-          <OtpVerify
-            phone={pending.phone}
+          /* STEP 2 — tap-to-verify on WhatsApp */
+          <WhatsAppTapVerify
+            start={pending}
             onVerified={handleVerified}
             onBack={() => setPending(null)}
           />
