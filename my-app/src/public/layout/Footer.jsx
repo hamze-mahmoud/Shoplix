@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Globe, AtSign, Camera } from "lucide-react";
+import { Globe, AtSign, Camera, MessageCircle, Phone } from "lucide-react";
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -80,13 +80,27 @@ export default function Footer() {
             ))}
           </div>
 
-          {/* CONTACT INFO */}
+          {/* CONTACT INFO — real business number: WhatsApp chat + phone call */}
           <div className="lg:col-span-3 space-y-3">
             <h3 className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40 mb-5">
               {t("contact.label")}
             </h3>
-            <p className="text-sm text-white/70 font-light">support@shoplix.com</p>
-            <p className="text-sm text-white/70 font-light">+970 123 456 789</p>
+            <a
+              href="https://wa.me/972593808251"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-white/70 font-light hover:text-[#4ADE80] transition-colors"
+            >
+              <MessageCircle className="w-4 h-4 text-[#4ADE80] shrink-0" />
+              <span dir="ltr">+972 59-380-8251</span>
+            </a>
+            <a
+              href="tel:+972593808251"
+              className="flex items-center gap-2 text-sm text-white/70 font-light hover:text-[#4ADE80] transition-colors"
+            >
+              <Phone className="w-4 h-4 text-[#4ADE80] shrink-0" />
+              <span dir="ltr">+972 59-380-8251</span>
+            </a>
             <p className="text-sm text-white/50 font-light">{t("contact.address")}</p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toastService } from "../../Shared/services/toastService";
-import { Mail, Phone, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Phone, MapPin, Clock, ArrowRight, MessageCircle } from "lucide-react";
 
 import Reveal from "../../Shared/components/Reveal";
 
@@ -23,9 +23,25 @@ export default function Contact() {
     }, 600);
   };
 
+  // Real business number (also the WhatsApp Business / concierge number).
+  const BUSINESS_PHONE_DISPLAY = "+972 59-380-8251";
+  const BUSINESS_PHONE_INTL = "972593808251";
+
   const info = [
-    { icon: Mail, label: t("contact.info_email_label"), value: "support@shoplix.com" },
-    { icon: Phone, label: t("contact.info_phone_label"), value: "+970 123 456 789" },
+    {
+      icon: MessageCircle,
+      label: t("contact.info_whatsapp_label"),
+      value: BUSINESS_PHONE_DISPLAY,
+      hint: t("contact.info_whatsapp_hint"),
+      href: `https://wa.me/${BUSINESS_PHONE_INTL}`,
+    },
+    {
+      icon: Phone,
+      label: t("contact.info_phone_label"),
+      value: BUSINESS_PHONE_DISPLAY,
+      hint: t("contact.info_phone_hint"),
+      href: `tel:+${BUSINESS_PHONE_INTL}`,
+    },
     { icon: MapPin, label: t("contact.info_address_label"), value: t("contact.address") },
     { icon: Clock, label: t("contact.info_hours_label"), value: t("contact.hours") },
   ];
@@ -69,17 +85,38 @@ export default function Contact() {
 
           {/* INFO */}
           <Reveal x={30} className="lg:col-span-2 lg:border-s lg:border-[#111827]/10 lg:ps-12 space-y-10">
-            {info.map((item, i) => (
-              <div key={i} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full border border-[#111827]/15 flex items-center justify-center shrink-0">
-                  <item.icon className="w-4 h-4 text-[#16A34A]" />
+            {info.map((item, i) => {
+              const body = (
+                <>
+                  <div className="w-10 h-10 rounded-full border border-[#111827]/15 flex items-center justify-center shrink-0 group-hover:border-[#16A34A]/50 transition-colors">
+                    <item.icon className="w-4 h-4 text-[#16A34A]" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#111827]/40">{item.label}</p>
+                    <p dir="ltr" className="mt-1 text-[#111827]/80 text-start">{item.value}</p>
+                    {item.hint && (
+                      <p className="mt-0.5 text-xs text-[#16A34A]">{item.hint}</p>
+                    )}
+                  </div>
+                </>
+              );
+              // WhatsApp / phone rows are real links (tap to chat / call)
+              return item.href ? (
+                <a
+                  key={i}
+                  href={item.href}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="group flex items-start gap-4"
+                >
+                  {body}
+                </a>
+              ) : (
+                <div key={i} className="flex items-start gap-4">
+                  {body}
                 </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#111827]/40">{item.label}</p>
-                  <p className="mt-1 text-[#111827]/80">{item.value}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </Reveal>
         </div>
       </div>
