@@ -1,5 +1,6 @@
 module.exports = {
   signUp: require('./signUp'),
+  signUpDirect: require('./signUpDirect'),
   signIn: require('./signIn'),
   verifyOtp: require('./verifyOtp'),
   resendOtp: require('./resendOtp'),

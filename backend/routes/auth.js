@@ -14,6 +14,9 @@ const loginLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 8 })
 
 // public
 router.post("/signup", authLimiter, authCtrl.signUp);
+// Direct signup (no WhatsApp code) — temporary while Meta business
+// verification is pending; creates the account verified + logs straight in.
+router.post("/signup-direct", authLimiter, authCtrl.signUpDirect);
 router.post("/signin", loginLimiter, authCtrl.signIn);
 
 // WhatsApp OTP: confirm the 6-digit signup code / re-send it

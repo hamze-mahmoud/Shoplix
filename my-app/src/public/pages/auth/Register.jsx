@@ -7,8 +7,6 @@ import { toastService } from "../../../Shared/services/toastService";
 import { authService } from "../../../Shared/services/authService";
 import { AuthContext } from "../../../Shared/AuthContext";
 import AuthShell from "./components/AuthShell";
-import WhatsAppNote from "./components/WhatsAppNote";
-import WhatsAppTapVerify from "./components/WhatsAppTapVerify";
 
 import { normalizeLocalPhone, isValidMobile } from "./phoneUtils";
 
@@ -90,9 +88,6 @@ export default function Register() {
   const [showConfirm, setShowConfirm] = useState(false);
   // +970 (Palestine) / +972 (Israel) prefix for the phone field.
   const [countryCode, setCountryCode] = useState("970");
-  // After signup the account exists but is unverified — this holds the phone
-  // while the user enters the WhatsApp OTP.
-  const [pending, setPending] = useState(null);
 
   useEffect(() => {
     gsap.fromTo(
@@ -124,11 +119,13 @@ export default function Register() {
 
     setLoading(true);
     try {
-      // Step 1: create the account UNVERIFIED and get a code the customer sends
-      // to our WhatsApp to prove ownership (tap-to-verify — no OTP send needed).
+      // Direct signup (no WhatsApp code while Meta verification is pending):
+      // the account is created verified and a session comes straight back.
       const phone = `+${countryCode}${normalizeLocalPhone(form.phone)}`;
-      const res = await authService.waStart({ ...form, phone });
-      setPending(res.data); // { token, code, waLink, businessNumber }
+      const res = await authService.registerDirect({ ...form, phone });
+      login(res.data.user, res.data.accessToken);
+      toastService.success(t("auth.account_created", "Account created!"));
+      navigate("/", { replace: true });
     } catch (err) {
       const e = err.response?.data?.error;
       toastService.error(typeof e === "string" ? e : e?.message || t("auth.register_failed", "Registration failed"));
@@ -137,28 +134,12 @@ export default function Register() {
     }
   };
 
-  // Step 2 done: the backend confirmed the code and issued a session.
-  const handleVerified = (user, accessToken) => {
-    login(user, accessToken);
-    toastService.success(t("auth.account_created", "Account created!"));
-    navigate("/", { replace: true });
-  };
-
   return (
     <AuthShell>
       <div
         ref={containerRef}
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-white/10"
       >
-        {pending ? (
-          /* STEP 2 — tap-to-verify on WhatsApp */
-          <WhatsAppTapVerify
-            start={pending}
-            onVerified={handleVerified}
-            onBack={() => setPending(null)}
-          />
-        ) : (
-        <>
         {/* HEADER */}
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-extrabold text-gray-900">
@@ -166,9 +147,6 @@ export default function Register() {
           </h2>
           <p className="text-gray-500 text-sm">{t("auth.register_subtitle")}</p>
         </div>
-
-        {/* WhatsApp verification notice */}
-        <WhatsAppNote />
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -281,8 +259,6 @@ export default function Register() {
             {t("auth.sign_in")}
           </Link>
         </p>
-        </>
-        )}
       </div>
     </AuthShell>
   );

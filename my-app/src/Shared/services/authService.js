@@ -14,6 +14,10 @@ export const authService = {
   login: (data) => api.post("/auth/signin", data),
   register: (data) => api.post("/auth/signup", data),
 
+  // Direct signup (no WhatsApp code, temporary while Meta verification is
+  // pending). Responds like /signin: { user, accessToken }.
+  registerDirect: (data) => api.post("/auth/signup-direct", data),
+
   // WhatsApp OTP (signup verification): confirm the 6-digit code / re-send it.
   // verifyOtp responds like /signin ({ user, accessToken }) on success.
   verifyOtp: (data) => api.post("/auth/verify-otp", data),
