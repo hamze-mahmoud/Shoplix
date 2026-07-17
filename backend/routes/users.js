@@ -10,5 +10,6 @@ router.post('/', usersCtrl.createUser)
 // A user can get and update their own profile
 router.get('/me', protect, usersCtrl.getCurrentUser)
 router.put('/me', protect, usersCtrl.updateUser) // Controller should use req.user.id
+router.put('/me/password', protect, usersCtrl.changePassword)
 
 module.exports = router

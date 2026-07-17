@@ -88,7 +88,7 @@ module.exports = async function createOrder(req, res) {
 
     const items = [];
     // { widthCm, heightCm, quantity } per unit — drives the order's size-based
-    // delivery fee (combined area → one multiplier). See utils/delivery.js.
+    // delivery fee (combined linear size → one multiplier). See utils/delivery.js.
     const deliveryItems = [];
 
     // Validate stock + build localized snapshots
@@ -194,8 +194,8 @@ module.exports = async function createOrder(req, res) {
       });
     }
 
-    // Delivery fee: region base (₪20, or ₪70 remote) × each item's size
-    // multiplier × quantity, summed. See utils/delivery.js.
+    // Delivery fee: region base × ONE size multiplier from the order's combined
+    // linear size x = Σ(longest side × qty). See utils/delivery.js.
     const shippingCost = computeDelivery(deliveryItems, shippingAddress.region);
 
     const totalPrice =

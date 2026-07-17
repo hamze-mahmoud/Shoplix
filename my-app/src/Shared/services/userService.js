@@ -14,4 +14,10 @@ export const userService = {
   deleteUser: (id) => apiClient.delete(`/admin/users/${id}`),
 
   getCurrentUser: () => apiClient.get("/users/me"),
+
+  // Self-service profile edits (name / phone / email)
+  updateProfile: (data) => apiClient.put("/users/me", data),
+
+  // Change own password (requires the current password)
+  changePassword: (data) => apiClient.put("/users/me/password", data),
 };
