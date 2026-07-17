@@ -22,6 +22,7 @@ const TailoredPage = lazy(() => import("../public/pages/tailored/TailoredPage"))
 
 const About = lazy(() => import("../public/pages/About"));
 const Contact = lazy(() => import("../public/pages/Contact"));
+const Privacy = lazy(() => import("../public/pages/Privacy"));
 
 const ComponentShowcase = lazy(() =>
   import("../Shared/pages/ComponentShowcase")
@@ -74,6 +75,9 @@ const PublicRoutes = [
   /* COMPANY */
   { path: "/about", element: <About /> },
   { path: "/contact", element: <Contact /> },
+  // Public + unguarded: Meta requires a reachable privacy-policy URL to publish
+  // the WhatsApp app (Development → Live).
+  { path: "/privacy", element: <Privacy /> },
 
   /* SHOWCASE */
   { path: "/showcase", element: <ComponentShowcase /> },
