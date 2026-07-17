@@ -4,6 +4,7 @@ import { ShieldCheck, Truck } from "lucide-react";
 import { useCart } from "../../../context/CartContext";
 import { toastService } from "../../../../Shared/services/toastService";
 import { formatPrice } from "../../../../Shared/utils/formPrice";
+import WhatsAppHelp from "../../../../Shared/components/WhatsAppHelp";
 
 export default function CartSummary() {
   const { cart, isLoggedIn } = useCart();
@@ -62,6 +63,9 @@ export default function CartSummary() {
           <span>{t("cart.fast_delivery")}</span>
         </div>
       </div>
+
+      {/* NEED HELP? — WhatsApp / call, catches question-blocked shoppers */}
+      <WhatsAppHelp />
     </div>
   );
 }

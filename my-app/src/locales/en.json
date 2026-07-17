@@ -6,6 +6,12 @@
     "free_shipping": "Free shipping on orders over ₪200",
     "whatsapp": "New: shop by chatting with our AI assistant on WhatsApp"
   },
+  "help": {
+    "title": "Need help with your order?",
+    "whatsapp": "Chat on WhatsApp",
+    "call": "Call us",
+    "prefill": "Hi Shoplix! I have a question about my order."
+  },
   "profile": {
     "title": "My Account",
     "nav_profile": "Profile",
