@@ -4,6 +4,7 @@ import { localized } from "../../../Shared/utils/localize";
 import { onImgError } from "../../../Shared/utils/imageFallback";
 import { formatPrice } from "../../../Shared/utils/formPrice";
 import { computeDelivery } from "../../../Shared/utils/shipping";
+import WhatsAppHelp from "../../../Shared/components/WhatsAppHelp";
 
 export default function OrderReview({ cart, shippingAddress, onPlaceOrder, loading }) {
   const { t, i18n } = useTranslation();
@@ -106,6 +107,9 @@ export default function OrderReview({ cart, shippingAddress, onPlaceOrder, loadi
         </button>
 
         <p className="text-center text-xs text-gray-400">{t("checkout.secure_payment")}</p>
+
+        {/* NEED HELP? — WhatsApp / call at the final decision moment */}
+        <WhatsAppHelp className="border-gray-200" />
       </div>
     </div>
   );
