@@ -1,6 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Sparkles, Tag, ShieldCheck, ArrowRight } from "lucide-react";
+import {
+  Sparkles,
+  Tag,
+  ShieldCheck,
+  ArrowRight,
+  Wallet,
+  Truck,
+  MessageCircle,
+  PackageCheck,
+} from "lucide-react";
 
 import Reveal from "../../Shared/components/Reveal";
 
@@ -13,11 +22,14 @@ export default function About() {
     { icon: ShieldCheck, title: t("about.value3_title"), body: t("about.value3_body") },
   ];
 
-  const stats = [
-    { v: t("about.stat1_value"), l: t("about.stat1_label") },
-    { v: t("about.stat2_value"), l: t("about.stat2_label") },
-    { v: t("about.stat3_value"), l: t("about.stat3_label") },
-    { v: t("about.stat4_value"), l: t("about.stat4_label") },
+  // Real promises, not vanity numbers — each one is something the store
+  // actually does (COD, all-region delivery, direct WhatsApp line, human
+  // order confirmation). Credibility over fabricated stats.
+  const commitments = [
+    { icon: Wallet, title: t("about.commit1_title"), body: t("about.commit1_body") },
+    { icon: Truck, title: t("about.commit2_title"), body: t("about.commit2_body") },
+    { icon: MessageCircle, title: t("about.commit3_title"), body: t("about.commit3_body") },
+    { icon: PackageCheck, title: t("about.commit4_title"), body: t("about.commit4_body") },
   ];
 
   return (
@@ -47,7 +59,7 @@ export default function About() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
           <Reveal x={-30} className="img-zoom aspect-[4/3] bg-[#E5E7EB]">
             <img
-              src="https://images.unsplash.com/photo-1556656793-08538906a9f8?w=1100&q=80"
+              src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1100&q=80"
               alt=""
               loading="lazy"
               className="w-full h-full object-cover"
@@ -61,13 +73,16 @@ export default function About() {
         </div>
       </section>
 
-      {/* STATS BAND */}
+      {/* COMMITMENTS BAND — true promises instead of vanity stats */}
       <section className="bg-[#111827] text-white">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 py-16 grid grid-cols-2 md:grid-cols-4 gap-y-10">
-          {stats.map((s, i) => (
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 py-16 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
+          {commitments.map((c, i) => (
             <Reveal key={i} delay={i * 0.06} className="text-center">
-              <p className="font-display text-5xl sm:text-6xl font-light text-[#FACC15]">{s.v}</p>
-              <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-white/60">{s.l}</p>
+              <div className="w-12 h-12 mx-auto rounded-full border border-[#FACC15]/40 flex items-center justify-center mb-4">
+                <c.icon className="w-5 h-5 text-[#FACC15]" />
+              </div>
+              <p className="font-display text-xl sm:text-2xl font-light">{c.title}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-white/60 max-w-[24ch] mx-auto">{c.body}</p>
             </Reveal>
           ))}
         </div>
