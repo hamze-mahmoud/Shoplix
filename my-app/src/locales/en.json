@@ -387,6 +387,10 @@
       "cancelled": {
         "title": "Order cancelled",
         "message": "Your order #{{orderId}} has been cancelled."
+      },
+      "new_offer": {
+        "title": "New offer 🔥",
+        "message": "\"{{title}}\" is now live — for a limited time. Tap to see it."
       }
     }
   },

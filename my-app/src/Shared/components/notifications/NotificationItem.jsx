@@ -8,6 +8,7 @@ import {
   PackageCheck,
   XCircle,
   Bell,
+  Flame,
 } from "lucide-react";
 
 import { timeAgo } from "../../utils/timeAgo";
@@ -21,6 +22,7 @@ const EVENT_STYLE = {
   out_for_delivery: { icon: Bike, color: "text-green-700", bg: "bg-green-100" },
   delivered: { icon: PackageCheck, color: "text-green-600", bg: "bg-green-50" },
   cancelled: { icon: XCircle, color: "text-red-600", bg: "bg-red-50" },
+  new_offer: { icon: Flame, color: "text-amber-600", bg: "bg-amber-50" },
 };
 
 export default function NotificationItem({ notification, onClick }) {
@@ -34,16 +36,23 @@ export default function NotificationItem({ notification, onClick }) {
   };
   const Icon = style.icon;
 
+  // Broadcast promos carry per-language titles in params.titles — pick the
+  // viewer's language so the offer name renders localized, not canonical.
+  const params = { ...(notification.params || {}) };
+  const lang = (i18n.language || "en").slice(0, 2);
+  if (params.titles) params.title = params.titles[lang] || params.title;
+
   const title = notification.titleKey
-    ? t(notification.titleKey, notification.params || {})
+    ? t(notification.titleKey, params)
     : notification.title;
   const message = notification.messageKey
-    ? t(notification.messageKey, notification.params || {})
+    ? t(notification.messageKey, params)
     : notification.message;
 
   const handleClick = () => {
     onClick?.(notification);
     if (notification.order) navigate(`/orders/${notification.order}`);
+    else if (params.offerId) navigate(`/offers/${params.offerId}`);
   };
 
   return (

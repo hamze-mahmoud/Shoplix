@@ -44,6 +44,11 @@ const notificationSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+
+    // For BROADCAST notifications (user: null) the single `read` flag can't
+    // work — one user reading it would hide it for everyone. Broadcasts track
+    // readers here instead; per-user `read` is computed on fetch.
+    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true }
 )

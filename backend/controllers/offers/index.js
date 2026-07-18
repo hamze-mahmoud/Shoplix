@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const BundleOffer = require("../../models/BundleOffer");
 const { resolveBundle } = require("../../utils/resolveBundle");
 const { parseTranslations, deriveCanonical } = require("../../utils/i18nFields");
+const { maybeAnnounceOffer } = require("../../utils/notifyOffer");
 
 const OFFER_TEXT_FIELDS = ["title", "description"];
 
@@ -175,6 +176,9 @@ async function createOffer(req, res) {
       status: p.status || "draft",
     });
 
+    // Created straight into a live state → tell every customer (once).
+    await maybeAnnounceOffer(req.app.get("io"), offer);
+
     res.status(201).json({ success: true, data: offer });
   } catch (err) {
     console.error("createOffer error:", err);
@@ -209,6 +213,11 @@ async function updateOffer(req, res) {
       return res.status(400).json({ success: false, message: "End date must be after start date" });
 
     await offer.save();
+
+    // If this edit made the offer live for the first time (e.g. draft →
+    // active), announce it to customers. No-op on already-announced offers.
+    await maybeAnnounceOffer(req.app.get("io"), offer);
+
     res.json({ success: true, data: offer });
   } catch (err) {
     console.error("updateOffer error:", err);

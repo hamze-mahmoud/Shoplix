@@ -50,6 +50,10 @@ const bundleOfferSchema = new mongoose.Schema(
       enum: ["draft", "active", "inactive"],
       default: "draft",
     },
+
+    // Set the first time the offer goes LIVE and customers were notified —
+    // guards against re-announcing on every later edit/status flip.
+    announcedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
