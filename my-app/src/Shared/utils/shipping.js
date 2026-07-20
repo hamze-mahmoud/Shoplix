@@ -3,7 +3,8 @@
 //
 // Base fee is per region: West Bank ₪20, Jerusalem ₪30, Palestinian Territories
 // 1948 ₪70. The WHOLE order then gets ONE size multiplier from its combined
-// LINEAR size  x = Σ (each item's longest side × qty), in cm:
+// LINEAR size  x = Σ (each item's LARGEST dimension × qty), in cm — the biggest
+// of width/height/depth/diameter, so it works for any shape:
 //   x < 100 cm → ×1 · x = 100 cm → ×1.5 · x > 100 cm → ×(x / 70)
 // delivery = round(regionBase × multiplier).
 
@@ -14,12 +15,16 @@ const SIZE_UNIT_CM = 70; // over 1 m, every 70 cm adds one base-fee unit
 
 export const baseDeliveryFee = (region) => REGION_FEE[region] ?? DEFAULT_FEE;
 
-// items → the order's linear size x (cm): sum of each item's longest side × qty.
+// The dimension fields an item can carry; the largest is its "size" for shipping.
+const DIMENSION_KEYS = ["widthCm", "heightCm", "depthCm", "diameterCm"];
+
+// An item's largest dimension (cm), across whatever dims its shape provided.
+export const longestSide = (item = {}) =>
+  DIMENSION_KEYS.reduce((mx, k) => Math.max(mx, Number(item[k]) || 0), 0);
+
+// items → the order's linear size x (cm): sum of each item's largest side × qty.
 export const orderLinearSize = (items = []) =>
-  items.reduce((sum, it) => {
-    const longest = Math.max(Number(it.widthCm) || 0, Number(it.heightCm) || 0);
-    return sum + longest * (it.quantity || 1);
-  }, 0);
+  items.reduce((sum, it) => sum + longestSide(it) * (it.quantity || 1), 0);
 
 // order linear size x (cm) → size multiplier
 export const orderSizeMultiplier = (x) => {

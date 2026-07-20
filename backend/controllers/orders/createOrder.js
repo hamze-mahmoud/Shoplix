@@ -96,7 +96,13 @@ module.exports = async function createOrder(req, res) {
       const product = cartItem.product;
       const variant = product.variants.id(cartItem.variantId);
 
-      deliveryItems.push({ widthCm: variant.widthCm, heightCm: variant.heightCm, quantity: cartItem.quantity });
+      deliveryItems.push({
+        widthCm: variant.widthCm,
+        heightCm: variant.heightCm,
+        depthCm: variant.depthCm,
+        diameterCm: variant.diameterCm,
+        quantity: cartItem.quantity,
+      });
 
       if (variant.stock < cartItem.quantity) {
         return res.status(400).json({
@@ -151,7 +157,13 @@ module.exports = async function createOrder(req, res) {
           });
         }
         const neededQty = (bItem.quantity || 1) * bundleQty;
-        deliveryItems.push({ widthCm: bVariant.widthCm, heightCm: bVariant.heightCm, quantity: neededQty });
+        deliveryItems.push({
+          widthCm: bVariant.widthCm,
+          heightCm: bVariant.heightCm,
+          depthCm: bVariant.depthCm,
+          diameterCm: bVariant.diameterCm,
+          quantity: neededQty,
+        });
         if (bVariant.stock < neededQty) {
           return res.status(400).json({
             success: false,

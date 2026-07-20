@@ -39,6 +39,8 @@ exports.getCart = async (req, res) => {
           storage: variant.storage,
           widthCm: variant.widthCm,                    // dimensions → delivery fee
           heightCm: variant.heightCm,
+          depthCm: variant.depthCm,
+          diameterCm: variant.diameterCm,
           variantTranslations: variant.translations,  // localized color/storage
           stock: variant.stock,                        // available stock (quantity cap)
 

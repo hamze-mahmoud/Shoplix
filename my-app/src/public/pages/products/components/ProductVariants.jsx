@@ -33,8 +33,19 @@ export default function ProductVariants({ product, setSelectedV }) {
   const isOutOfStock = (v) => (v.stock || 0) === 0;
   const isLowStock = (v) => (v.stock || 0) > 0 && (v.stock || 0) <= 5;
   // Dimensions stay hidden for normal items; only surfaced for oversized ones
-  // (any side over 2 m) so shoppers know it's a large item before ordering.
-  const isOversized = (v) => Number(v?.widthCm) > 200 || Number(v?.heightCm) > 200;
+  // (any dimension over 2 m) so shoppers know it's a large item before ordering.
+  const isOversized = (v) =>
+    [v?.widthCm, v?.heightCm, v?.depthCm, v?.diameterCm].some((n) => Number(n) > 200);
+
+  // Human dimension label from whatever dims the shape provided: round items
+  // read as "⌀90 cm" / "⌀40 × 120 cm"; others as "170 × 80 × 40 cm".
+  const dimsLabel = (v) => {
+    const d = Number(v?.diameterCm) || 0;
+    const h = Number(v?.heightCm) || 0;
+    if (d > 0) return h > 0 ? `⌀${d} × ${h} cm` : `⌀${d} cm`;
+    const parts = [v?.widthCm, v?.heightCm, v?.depthCm].map((n) => Number(n) || 0).filter((n) => n > 0);
+    return parts.length ? `${parts.join(" × ")} cm` : "";
+  };
 
   return (
     <div className="space-y-4">
@@ -116,7 +127,7 @@ export default function ProductVariants({ product, setSelectedV }) {
                 className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-xs"
                 title={t("products.large_item")}
               >
-                📦 {selected.widthCm} × {selected.heightCm} cm
+                📦 {dimsLabel(selected)}
               </span>
             </>
           )}

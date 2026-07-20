@@ -19,11 +19,14 @@ const variantSchema = new mongoose.Schema({
   costPrice: Number,  // cost to acquire — used for profit/margin analytics
   stock: Number,
   images: [String],
-  // Physical dimensions in centimetres (10–500). The whole order's combined
-  // area (Σ width×height×qty) drives the delivery multiplier — see
-  // utils/delivery.js. Legacy variants with no dimensions count as 0 area.
+  // Physical dimensions in centimetres (0–500). All optional — the admin fills
+  // only the ones that fit the product's shape: a box uses width/height/depth,
+  // a cylinder uses diameter/height, a round item just diameter. Delivery uses
+  // each item's LARGEST dimension (see utils/delivery.js); unset dims are 0.
   widthCm: { type: Number, default: 0, min: 0, max: 500 },
   heightCm: { type: Number, default: 0, min: 0, max: 500 },
+  depthCm: { type: Number, default: 0, min: 0, max: 500 },
+  diameterCm: { type: Number, default: 0, min: 0, max: 500 },
 });
 
 // Per-language localized text. `name`/`description` below stay as the canonical

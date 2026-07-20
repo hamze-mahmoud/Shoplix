@@ -59,6 +59,8 @@ export default function VariantBuilder({ variants, setVariants }) {
         stock: "",
         widthCm: "",
         heightCm: "",
+        depthCm: "",
+        diameterCm: "",
         images: [],
       },
     ]);
@@ -108,39 +110,40 @@ export default function VariantBuilder({ variants, setVariants }) {
             />
           </div>
 
-          {/* Physical size in cm (10–500) → drives the order's delivery fee */}
+          {/* Physical size in cm (0–500). All optional — fill only the dims that
+              fit the product's shape. Delivery uses the LARGEST one. */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("admin.products.dimensions_label", "Size (cm) — affects delivery fee")}
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0}
-                  max={500}
-                  value={variant.widthCm ?? ""}
-                  onChange={(e) => handleChange(i, "widthCm", Number(e.target.value))}
-                  placeholder={t("admin.products.width", "Width")}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pe-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
-                />
-                <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">cm</span>
-              </div>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0}
-                  max={500}
-                  value={variant.heightCm ?? ""}
-                  onChange={(e) => handleChange(i, "heightCm", Number(e.target.value))}
-                  placeholder={t("admin.products.height", "Height")}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pe-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
-                />
-                <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">cm</span>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                ["widthCm", t("admin.products.width", "Width")],
+                ["heightCm", t("admin.products.height", "Height")],
+                ["depthCm", t("admin.products.depth", "Depth")],
+                ["diameterCm", t("admin.products.diameter", "Diameter")],
+              ].map(([key, label]) => (
+                <div key={key} className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={500}
+                    value={variant[key] ?? ""}
+                    onChange={(e) =>
+                      handleChange(i, key, e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    placeholder={label}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 pe-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                  />
+                  <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">cm</span>
+                </div>
+              ))}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {t("admin.products.dimensions_hint", "Delivery is based on the whole order's combined size: under 1m² ×1 · 1–2m² ×1.5 · over 2m² ×2.")}
+              {t(
+                "admin.products.dimensions_hint",
+                "Fill only the dimensions that apply (box: width/height/depth · cylinder: diameter/height · round: diameter). Delivery uses each item's largest dimension: under 1m ×1 · 1m ×1.5 · over 1m ×(size÷70)."
+              )}
             </p>
           </div>
 
