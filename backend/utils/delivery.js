@@ -4,10 +4,11 @@
 // 1948 ₪70. The WHOLE ORDER then gets a SINGLE size multiplier from its combined
 // LINEAR size  x = Σ (each item's LARGEST dimension × quantity), in cm. An
 // item's largest dimension is the biggest of width/height/depth/diameter — so
-// the metric works for any shape (box, cylinder, round item):
-//   x < 100 cm  (under 1 m)   → ×1
-//   x = 100 cm  (exactly 1 m) → ×1.5
-//   x > 100 cm  (over 1 m)    → ×(x / 70)   — one base-fee unit per 70 cm
+// the metric works for any shape (box, cylinder, round item). The multiplier
+// steps up per metre:
+//   under 1 m               → ×1
+//   exactly N metres        → ×(N + 0.5)   (1 m ×1.5, 2 m ×2.5, 3 m ×3.5 …)
+//   between N and N+1 metres → ×(N + 1)     (1–2 m ×2, 2–3 m ×3, 3–4 m ×4 …)
 //   delivery = round(regionBase × multiplier)          (one fee for the order)
 // Kept in one place so backend (order truth) and frontend (checkout preview)
 // stay identical.
@@ -20,8 +21,7 @@ const REGION_FEE = {
 };
 const DEFAULT_FEE = 20;
 
-const ONE_METRE_CM = 100; // 1 m threshold, in cm
-const SIZE_UNIT_CM = 70; // over 1 m, every 70 cm adds one base-fee unit
+const ONE_METRE_CM = 100; // 1 m, in cm
 
 function baseDeliveryFee(region) {
   return REGION_FEE[region] ?? DEFAULT_FEE;
@@ -40,11 +40,13 @@ function orderLinearSize(items) {
   return items.reduce((sum, it) => sum + longestSide(it) * (it.quantity || 1), 0);
 }
 
-// order linear size x (cm) → size multiplier
+// order linear size x (cm) → size multiplier (per-metre steps; see header).
 function orderSizeMultiplier(x) {
-  if (x < ONE_METRE_CM) return 1; // under 1 m
-  if (x === ONE_METRE_CM) return 1.5; // exactly 1 m
-  return x / SIZE_UNIT_CM; // over 1 m: proportional, one unit per 70 cm
+  const cm = Math.round(x); // whole-cm tiers → robust exact-metre check
+  if (cm < ONE_METRE_CM) return 1; // under 1 m
+  const metres = Math.floor(cm / ONE_METRE_CM);
+  const onExactMetre = cm % ONE_METRE_CM === 0;
+  return onExactMetre ? metres + 0.5 : metres + 1;
 }
 
 // items: [{ widthCm, heightCm, depthCm, diameterCm, quantity }] → one delivery
@@ -57,7 +59,6 @@ function computeDelivery(items, region) {
 module.exports = {
   REGION_FEE,
   ONE_METRE_CM,
-  SIZE_UNIT_CM,
   DIMENSION_KEYS,
   baseDeliveryFee,
   longestSide,

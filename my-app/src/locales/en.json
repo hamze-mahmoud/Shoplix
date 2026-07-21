@@ -771,7 +771,7 @@
       "height": "Height",
       "depth": "Depth",
       "diameter": "Diameter",
-      "dimensions_hint": "Fill only the dimensions that apply (box: width/height/depth · cylinder: diameter/height · round: diameter). Delivery uses each item's largest dimension: under 1m ×1 · 1m ×1.5 · over 1m ×(size÷70).",
+      "dimensions_hint": "Fill only the dimensions that apply (box: width/height/depth · cylinder: diameter/height · round: diameter). Delivery scales with the order's combined size: under 1m ×1 · 1m ×1.5 · 1–2m ×2 · 2m ×2.5 · 2–3m ×3 …",
       "audience_label": "Who is this product for?",
       "audience_hint": "Multiple selections possible. Powers the “Tailored for you” page and AI recommendations. Leave empty if it suits everyone.",
       "add_images": "Add Images",

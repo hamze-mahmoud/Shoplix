@@ -142,7 +142,7 @@ export default function VariantBuilder({ variants, setVariants }) {
             <p className="text-xs text-gray-500 mt-1">
               {t(
                 "admin.products.dimensions_hint",
-                "Fill only the dimensions that apply (box: width/height/depth · cylinder: diameter/height · round: diameter). Delivery uses each item's largest dimension: under 1m ×1 · 1m ×1.5 · over 1m ×(size÷70)."
+                "Fill only the dimensions that apply (box: width/height/depth · cylinder: diameter/height · round: diameter). Delivery scales with the order's combined size: under 1m ×1 · 1m ×1.5 · 1–2m ×2 · 2m ×2.5 · 2–3m ×3 …"
               )}
             </p>
           </div>
