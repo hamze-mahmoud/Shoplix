@@ -153,3 +153,24 @@ html {
   from { transform: translateX(-60%); }
   to { transform: translateX(60%); }
 }
+
+/* Slow infinite category banner. The card list is rendered twice; translating
+   the track by exactly one copy (-50% minus half the 1.25rem gap) loops it
+   seamlessly. Hover pauses; reduced-motion users get a static row. */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 0.625rem)); }
+}
+.marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 1.25rem;
+  animation: marquee-x var(--marquee-duration, 60s) linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}

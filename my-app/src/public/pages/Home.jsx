@@ -6,7 +6,7 @@ import { ArrowRight, ShieldCheck, BadgeCheck, Lock } from "lucide-react";
 import Reveal from "../../Shared/components/Reveal";
 import HeroSlider from "../components/HeroSlider";
 import ProductCarousel from "../components/ProductCarousel";
-import CategoryGrid from "../components/CategoryGrid";
+import CategoryMarquee from "../components/CategoryMarquee";
 import { categoryService } from "../../Shared/services/categoryService";
 import { productService } from "../../Shared/services/productService";
 import { bannerService } from "../../Shared/services/bannerService";
@@ -189,7 +189,7 @@ export default function Home() {
             </Link>
           </Reveal>
 
-          <CategoryGrid categories={categories} loading={catLoading} />
+          <CategoryMarquee categories={categories} loading={catLoading} />
         </div>
       </section>
 
