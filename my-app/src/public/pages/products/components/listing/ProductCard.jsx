@@ -31,14 +31,14 @@ export default function ProductCard({ product }) {
     <div className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-[#111827]/15 hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
       {/* IMAGE */}
-      <div className="relative h-48 sm:h-52 bg-[#F8F9FA] overflow-hidden">
+      <div className="relative h-44 sm:h-52 bg-[#F8F9FA] overflow-hidden">
         {image ? (
           <img
             src={image}
             alt={localized(product, "name", lang)}
             loading="lazy"
             onError={onImgError}
-            className={`w-full h-full object-contain group-hover:scale-105 transition duration-500 ${isOutOfStock ? "opacity-50 grayscale" : ""}`}
+            className={`w-full h-full object-cover group-hover:scale-105 transition duration-500 ${isOutOfStock ? "opacity-50 grayscale" : ""}`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">📦</div>
@@ -98,8 +98,8 @@ export default function ProductCard({ product }) {
         )}
 
         {/* PRICE + CTA */}
-        <div className="flex items-center justify-between pt-3 mt-auto border-t border-gray-100">
-          <div className="pt-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap pt-3 mt-auto border-t border-gray-100">
+          <div>
             {!priceRange ? (
               <span className="text-green-600 font-extrabold text-base sm:text-lg tracking-tight">
                 {t("products.no_price")}

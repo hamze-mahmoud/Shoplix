@@ -91,12 +91,13 @@ export default function TailoredPage() {
         <div className="grid lg:grid-cols-[240px_1fr] gap-6">
           {/* ===== SIDEBAR (desktop) / CHIP RAIL (mobile) ===== */}
           <aside>
-            <div className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+            {/* mobile: edge-to-edge horizontal snap rail · lg: sticky column */}
+            <div className="lg:sticky lg:top-24 flex lg:flex-col gap-2 overflow-x-auto no-scrollbar snap-x pb-2 lg:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
               {SEGMENTS.map(({ key, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => setSegment(key)}
-                  className={`${segBtn(segment === key)} shrink-0 lg:w-full`}
+                  className={`${segBtn(segment === key)} shrink-0 snap-start lg:w-full`}
                 >
                   <Icon className={`w-4 h-4 ${segment === key ? "text-green-300" : "text-[#16A34A]"}`} />
                   {t(`tailored.seg_${key}`)}
@@ -108,9 +109,9 @@ export default function TailoredPage() {
           {/* ===== RESULTS GRID ===== */}
           <div>
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-80 bg-white rounded-2xl border border-gray-100 animate-pulse" />
+                  <div key={i} className="h-72 bg-white rounded-2xl border border-gray-100 animate-pulse" />
                 ))}
               </div>
             ) : products.length === 0 ? (
@@ -119,7 +120,7 @@ export default function TailoredPage() {
                 {t("tailored.empty")}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {products.map((p, i) => (
                   <Reveal key={p._id} delay={Math.min(i * 0.05, 0.3)}>
                     <div>
