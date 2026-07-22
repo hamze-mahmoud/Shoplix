@@ -27,7 +27,7 @@ export default function OffersPage() {
     <div className="bg-[#F8F9FA] text-[#111827] min-h-screen">
       {/* HERO */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 pt-14 sm:pt-20 pb-8">
-        <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#2563EB]">
+        <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#16A34A]">
           <Tags className="w-4 h-4" />
           {t("offers.kicker")}
         </p>
@@ -67,7 +67,7 @@ export default function OffersPage() {
                       </div>
                     )}
                     {o.savingsPercent > 0 && (
-                      <span className="absolute top-4 start-4 bg-[#2563EB] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                      <span className="absolute top-4 start-4 bg-[#16A34A] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
                         -{o.savingsPercent}%
                       </span>
                     )}
@@ -87,7 +87,7 @@ export default function OffersPage() {
                     </p>
 
                     <div className="flex items-end gap-2 mt-4">
-                      <span className="text-2xl font-bold text-[#2563EB]">{formatPrice(o.offerPrice)}</span>
+                      <span className="text-2xl font-bold text-[#16A34A]">{formatPrice(o.offerPrice)}</span>
                       {o.originalTotal > o.offerPrice && (
                         <span className="text-sm text-black/40 line-through mb-1">{formatPrice(o.originalTotal)}</span>
                       )}

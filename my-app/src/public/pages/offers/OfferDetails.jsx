@@ -57,7 +57,7 @@ export default function OfferDetails() {
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-6">
         <Tags className="w-12 h-12 text-gray-300" />
         <h2 className="text-2xl font-display">{t("offers.not_found")}</h2>
-        <Link to="/offers" className="px-6 py-3 rounded-xl bg-[#111827] text-white font-semibold hover:bg-[#2563EB] transition">
+        <Link to="/offers" className="px-6 py-3 rounded-xl bg-[#111827] text-white font-semibold hover:bg-[#16A34A] transition">
           {t("offers.back_to_offers")}
         </Link>
       </div>
@@ -71,7 +71,7 @@ export default function OfferDetails() {
   return (
     <div className="bg-[#F8F9FA] text-[#111827] min-h-screen">
       <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8 sm:py-12">
-        <Link to="/offers" className="inline-flex items-center gap-2 text-sm text-black/60 hover:text-[#2563EB] mb-6">
+        <Link to="/offers" className="inline-flex items-center gap-2 text-sm text-black/60 hover:text-[#16A34A] mb-6">
           <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
           {t("offers.back_to_offers")}
         </Link>
@@ -95,7 +95,7 @@ export default function OfferDetails() {
                     key={i}
                     onClick={() => setActiveImg(i)}
                     className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition ${
-                      i === activeImg ? "border-[#2563EB]" : "border-black/10 opacity-70 hover:opacity-100"
+                      i === activeImg ? "border-[#16A34A]" : "border-black/10 opacity-70 hover:opacity-100"
                     }`}
                   >
                     <img src={img} alt="" onError={onImgError} className="w-full h-full object-cover" />
@@ -107,7 +107,7 @@ export default function OfferDetails() {
 
           {/* INFO */}
           <div>
-            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#2563EB]">
+            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#16A34A]">
               <Tags className="w-4 h-4" />
               {t("offers.bundle_deal")}
             </p>
@@ -116,7 +116,7 @@ export default function OfferDetails() {
 
             {/* PRICE */}
             <div className="mt-6 flex flex-wrap items-end gap-3">
-              <span className="text-4xl font-bold text-[#2563EB]">{formatPrice(offer.offerPrice)}</span>
+              <span className="text-4xl font-bold text-[#16A34A]">{formatPrice(offer.offerPrice)}</span>
               {offer.originalTotal > offer.offerPrice && (
                 <>
                   <span className="text-lg text-black/40 line-through mb-1">{formatPrice(offer.originalTotal)}</span>
@@ -145,7 +145,7 @@ export default function OfferDetails() {
               <button
                 onClick={handleAdd}
                 disabled={adding || !offer.inStock}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-white bg-[#111827] hover:bg-[#2563EB] shadow-md active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-white bg-[#111827] hover:bg-[#16A34A] shadow-md active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
                 {offer.inStock ? t("offers.add_bundle") : t("offers.out_of_stock")}

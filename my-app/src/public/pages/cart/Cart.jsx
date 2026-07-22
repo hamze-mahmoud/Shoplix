@@ -13,8 +13,8 @@ function CartBundleRow({ bundle, onRemove }) {
   const { t, i18n } = useTranslation();
   const title = localized(bundle, "title", i18n.language) || bundle.title;
   return (
-    <div className="bg-white rounded-3xl border border-[#2563EB]/20 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 bg-[#2563EB]/5 px-4 py-2 text-xs font-semibold text-[#2563EB]">
+    <div className="bg-white rounded-3xl border border-[#16A34A]/20 shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2 bg-[#16A34A]/5 px-4 py-2 text-xs font-semibold text-[#16A34A]">
         <Tags className="w-3.5 h-3.5" />
         {t("offers.bundle_deal")}
       </div>
@@ -25,13 +25,13 @@ function CartBundleRow({ bundle, onRemove }) {
           <div className="w-20 h-20 rounded-2xl bg-gray-100 shrink-0" />
         )}
         <div className="flex-1 min-w-0">
-          <Link to={`/offers/${bundle.bundleId}`} className="font-bold text-[#111827] hover:text-[#2563EB] truncate block">
+          <Link to={`/offers/${bundle.bundleId}`} className="font-bold text-[#111827] hover:text-[#16A34A] truncate block">
             {title}
           </Link>
           <p className="text-xs text-gray-500 mt-0.5">
             {bundle.products?.length} {t("offers.items_included")} · ×{bundle.quantity}
           </p>
-          <p className="text-lg font-bold text-[#2563EB] mt-1">{formatPrice(bundle.subtotal)}</p>
+          <p className="text-lg font-bold text-[#16A34A] mt-1">{formatPrice(bundle.subtotal)}</p>
         </div>
         <button
           onClick={() => onRemove(bundle.bundleId)}
