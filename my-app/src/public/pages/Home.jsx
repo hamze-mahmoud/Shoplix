@@ -295,16 +295,18 @@ export default function Home() {
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {/* Mobile: one-line horizontal scroll (no orphaned second row).
+              md+: a clean 3-up grid. */}
+          <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 -mx-6 px-6 md:mx-0 md:px-0">
             {trust.map(({ icon: Icon, label }, i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-white/10 border border-white/15 p-6 flex flex-col items-start gap-4"
+                className="snap-start shrink-0 w-[46%] sm:w-[30%] md:w-auto rounded-2xl bg-white/10 border border-white/15 p-5 sm:p-6 flex flex-col items-start gap-4"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#111827] flex items-center justify-center shrink-0">
                   <Icon className="w-5 h-5 text-green-300" />
                 </div>
-                <span className="text-sm font-medium leading-snug">{label}</span>
+                <span className="text-sm font-medium leading-snug whitespace-nowrap">{label}</span>
               </div>
             ))}
           </div>
