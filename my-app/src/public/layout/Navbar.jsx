@@ -1,6 +1,7 @@
 import {
   ShoppingCart,
   User,
+  UserRound,
   Menu,
   X,
   ChevronDown,
@@ -51,6 +52,16 @@ export default function Navbar() {
   const mobileRef = useRef(null);
 
   const currentLang = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
+
+  // Real identity for the signed-in state. The User model has no `name` field —
+  // it's firstName/lastName — so we build the display name + initials here (an
+  // initial-avatar reads more personal and trustworthy than a generic icon).
+  const fullName =
+    user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
+  const firstNameOnly = user?.firstName || (fullName ? fullName.split(/\s+/)[0] : "");
+  const initials = fullName
+    ? fullName.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+    : "";
 
   const handleLogout = async () => {
     setShowUserMenu(false);
@@ -210,7 +221,7 @@ export default function Navbar() {
               {({ isActive }) => (
                 <>
                   <span
-                    className={`text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${
+                    className={`whitespace-nowrap text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${
                       isActive ? "text-[#16A34A]" : "text-[#111827]/70 group-hover:text-[#111827]"
                     }`}
                   >
@@ -320,9 +331,14 @@ export default function Navbar() {
                 aria-label={t("nav.profile")}
                 className="flex items-center gap-2 h-10 ps-1 pe-2 sm:pe-2.5 rounded-full hover:bg-green-50 active:scale-95 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#16A34A] to-[#15803D] flex items-center justify-center text-white ring-2 ring-white shadow-sm shrink-0">
-                  <User className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#16A34A] to-[#15803D] flex items-center justify-center text-white ring-2 ring-white shadow-sm shrink-0 text-xs font-bold">
+                  {initials || <UserRound className="w-[18px] h-[18px]" strokeWidth={2.2} />}
                 </div>
+                {firstNameOnly && (
+                  <span className="hidden sm:block max-w-[96px] truncate text-sm font-semibold text-[#111827]">
+                    {firstNameOnly}
+                  </span>
+                )}
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-gray-500 hidden sm:block transition-transform duration-300 ${
                     showUserMenu ? "rotate-180 text-green-600" : ""
@@ -334,12 +350,16 @@ export default function Navbar() {
               {showUserMenu && (
                 <div className="absolute end-0 mt-2 w-60 bg-white border border-black/[0.06] rounded-2xl shadow-xl z-50 overflow-hidden animate-slide-down">
                   <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-[#111827] to-green-700">
-                    <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center text-white shrink-0">
-                      <User className="w-5 h-5" strokeWidth={2.2} />
+                    <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center text-white shrink-0 text-sm font-bold">
+                      {initials || <UserRound className="w-5 h-5" strokeWidth={2.2} />}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-                      <p className="text-xs text-green-100/80 truncate">{user?.email}</p>
+                      <p className="text-sm font-semibold text-white truncate">
+                        {fullName || t("nav.profile")}
+                      </p>
+                      <p className="text-xs text-green-100/80 truncate" dir="ltr">
+                        {user?.phone || user?.email}
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-col py-1.5 text-sm">
