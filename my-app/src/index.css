@@ -95,6 +95,17 @@ html {
   transition: none;
 }
 
+/* Never allow sideways scrolling ("split into two pages"). A stray element
+   wider than the viewport (edge-bleed rails, decorative overflows) is clipped
+   at the screen edge instead of adding a horizontal scrollbar. `clip` (not
+   `hidden`) is used so it doesn't create a scroll container that would break
+   the sticky navbar. Vertical scrolling is unaffected. */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 /* Logical properties fallback for older browsers */
 .start-0 { inset-inline-start: 0; }
 .end-0 { inset-inline-end: 0; }

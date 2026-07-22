@@ -215,7 +215,7 @@ export default function Navbar() {
         </Link>
 
         {/* NAV LINKS (desktop) */}
-        <nav className="hidden md:flex items-center gap-7 lg:gap-9">
+        <nav className="hidden lg:flex items-center gap-7 lg:gap-9">
           {navLinks.map((link) => (
             <NavLink key={link.to} to={link.to} data-nav-item className="group relative py-1">
               {({ isActive }) => (
@@ -240,7 +240,7 @@ export default function Navbar() {
         </nav>
 
         {/* SEARCH (desktop) */}
-        <div data-nav-item className="hidden md:flex flex-1 max-w-sm mx-2">
+        <div data-nav-item className="hidden lg:flex flex-1 max-w-sm mx-2">
           <SearchBar />
         </div>
 
@@ -248,7 +248,7 @@ export default function Navbar() {
         <div data-nav-item className="flex items-center gap-1 sm:gap-1.5">
           {/* Mobile hamburger */}
           <button
-            className={`md:hidden ${iconBtn}`}
+            className={`lg:hidden ${iconBtn}`}
             onClick={() => setOpenMenu(!openMenu)}
             aria-label="Menu"
           >
@@ -413,7 +413,7 @@ export default function Navbar() {
       {openMenu && (
         <div
           ref={mobileRef}
-          className="md:hidden border-t border-black/[0.06] px-4 pb-5 pt-4 space-y-4 bg-white/95 backdrop-blur-xl"
+          className="lg:hidden border-t border-black/[0.06] px-4 pb-5 pt-4 space-y-4 bg-white/95 backdrop-blur-xl"
         >
           <div data-mobile-item>
             <SearchBar />
