@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Sparkles, Baby, Rocket, Heart, User, Armchair, RefreshCw, Wand2,
+  Users, Baby, GraduationCap, Venus, Mars, Armchair,
+  BrainCircuit, CalendarDays, RefreshCw, PackageSearch,
 } from "lucide-react";
 
 import { productService } from "../../../Shared/services/productService";
@@ -10,11 +11,11 @@ import Reveal from "../../../Shared/components/Reveal";
 
 // Audience segments shown in the sidebar. "all" = the general AI mix.
 const SEGMENTS = [
-  { key: "all", icon: Sparkles },
+  { key: "all", icon: Users },
   { key: "kids", icon: Baby },
-  { key: "young", icon: Rocket },
-  { key: "women", icon: Heart },
-  { key: "men", icon: User },
+  { key: "young", icon: GraduationCap },
+  { key: "women", icon: Venus },
+  { key: "men", icon: Mars },
   { key: "elderly", icon: Armchair },
 ];
 
@@ -52,7 +53,7 @@ export default function TailoredPage() {
     `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition text-start whitespace-nowrap ${
       active
         ? "bg-[#111827] text-white shadow-md"
-        : "bg-white text-[#111827]/75 border border-black/10 hover:border-[#2563EB]/50 hover:text-[#111827]"
+        : "bg-white text-[#111827]/75 border border-black/10 hover:border-[#16A34A]/50 hover:text-[#111827]"
     }`;
 
   return (
@@ -60,8 +61,8 @@ export default function TailoredPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* HEADER */}
         <div className="mb-8">
-          <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#2563EB]">
-            <Wand2 className="w-4 h-4" />
+          <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#16A34A]">
+            <BrainCircuit className="w-4 h-4" />
             {t("tailored.kicker")}
           </p>
           <h1 className="font-display text-3xl sm:text-5xl mt-2">{t("tailored.title")}</h1>
@@ -73,9 +74,9 @@ export default function TailoredPage() {
               {eventChips.map((ev) => (
                 <span
                   key={ev.key}
-                  className="inline-flex items-center gap-1.5 bg-blue-50 text-[#2563EB] border border-blue-100 text-xs font-semibold px-3 py-1.5 rounded-full"
+                  className="inline-flex items-center gap-1.5 bg-green-50 text-[#16A34A] border border-green-100 text-xs font-semibold px-3 py-1.5 rounded-full"
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <CalendarDays className="w-3 h-3" />
                   {t(`tailored.event_${ev.key}`, ev.name)}
                 </span>
               ))}
@@ -97,7 +98,7 @@ export default function TailoredPage() {
                   onClick={() => setSegment(key)}
                   className={`${segBtn(segment === key)} shrink-0 lg:w-full`}
                 >
-                  <Icon className={`w-4 h-4 ${segment === key ? "text-green-400" : "text-[#2563EB]"}`} />
+                  <Icon className={`w-4 h-4 ${segment === key ? "text-green-300" : "text-[#16A34A]"}`} />
                   {t(`tailored.seg_${key}`)}
                 </button>
               ))}
@@ -114,7 +115,7 @@ export default function TailoredPage() {
               </div>
             ) : products.length === 0 ? (
               <div className="bg-white rounded-3xl border border-black/10 p-14 text-center text-black/50">
-                <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30" />
+                <PackageSearch className="w-8 h-8 mx-auto mb-3 opacity-30" />
                 {t("tailored.empty")}
               </div>
             ) : (
@@ -124,8 +125,8 @@ export default function TailoredPage() {
                     <div>
                       <ProductCard product={p} />
                       {p?.reason && (
-                        <p className="mt-1.5 ms-1 inline-flex items-center gap-1.5 text-[11px] text-[#2563EB]">
-                          <Wand2 className="w-3 h-3" />
+                        <p className="mt-1.5 ms-1 inline-flex items-center gap-1.5 text-[11px] text-[#16A34A]">
+                          <BrainCircuit className="w-3 h-3" />
                           {p.reason}
                         </p>
                       )}
