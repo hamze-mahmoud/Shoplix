@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Wand2, Sparkles, ArrowRight } from "lucide-react";
+import { BrainCircuit, CalendarDays, ArrowRight } from "lucide-react";
 
 import { productService } from "../../Shared/services/productService";
 import ProductCarousel from "./ProductCarousel";
@@ -37,8 +37,8 @@ export default function SmartPicks() {
       <Reveal className="mb-10 sm:mb-12">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#2563EB]">
-              <Wand2 className="w-4 h-4" />
+            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#16A34A]">
+              <BrainCircuit className="w-4 h-4" />
               {t("home.picks_kicker")}
             </p>
             <h2 className="font-display text-4xl sm:text-5xl mt-2">{t("home.picks_title")}</h2>
@@ -48,9 +48,9 @@ export default function SmartPicks() {
                 {context.events.map((ev) => (
                   <span
                     key={ev.key}
-                    className="inline-flex items-center gap-1.5 bg-blue-50 text-[#2563EB] border border-blue-100 text-xs font-semibold px-3 py-1 rounded-full"
+                    className="inline-flex items-center gap-1.5 bg-green-50 text-[#16A34A] border border-green-100 text-xs font-semibold px-3 py-1 rounded-full"
                   >
-                    <Sparkles className="w-3 h-3" />
+                    <CalendarDays className="w-3 h-3" />
                     {t(`tailored.event_${ev.key}`, ev.name)}
                   </span>
                 ))}
@@ -59,7 +59,7 @@ export default function SmartPicks() {
           </div>
           <Link
             to="/tailored"
-            className="btn-press inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111827] text-white text-sm font-semibold hover:bg-[#2563EB] transition-colors"
+            className="btn-press inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111827] text-white text-sm font-semibold hover:bg-[#16A34A] transition-colors"
           >
             {t("home.picks_cta")}
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
