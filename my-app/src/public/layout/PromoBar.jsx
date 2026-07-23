@@ -116,7 +116,7 @@ export default function PromoBar({ collapsed = false }) {
     <div
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className={`overflow-hidden transition-all duration-300 ease-out ${
+      className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
         collapsed ? "max-h-0 opacity-0" : "max-h-12 opacity-100"
       }`}
     >

@@ -209,14 +209,24 @@ export default function Navbar() {
   return (
     <header
       ref={headerRef}
-      className={`sticky top-0 z-50 backdrop-blur-xl transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)] border-b border-black/[0.06]"
-          : "bg-white/70 border-b border-transparent"
+      className={`sticky top-0 z-50 backdrop-blur-md transition-[background-color,border-color] duration-300 ${
+        scrolled ? "bg-white/90 border-b border-black/[0.06]" : "bg-white/70 border-b border-transparent"
       }`}
     >
       {/* dynamic rotating promo strip — offers, countdown, personalized picks */}
       <PromoBar collapsed={hidePromo} />
+
+      {/* Drop shadow as a separate opacity-only layer instead of transitioning
+          box-shadow on the header itself. Animating box-shadow forces the
+          browser to repaint its blur/spread on every frame of the transition —
+          a common source of scroll jank, especially on mobile. Opacity is
+          compositor-only (GPU), so this fades in for free. */}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-x-0 top-full h-px shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)] transition-opacity duration-300 ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
       {/* subtle green accent hairline when scrolled */}
       <span
@@ -225,11 +235,12 @@ export default function Navbar() {
         }`}
       />
 
-      <div
-        className={`max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 gap-4 transition-all duration-300 ${
-          scrolled ? "py-2.5" : "py-4"
-        }`}
-      >
+      {/* Fixed padding — no longer condenses on scroll. Animating padding
+          forces a layout reflow on every threshold crossing (and was the root
+          cause of the earlier header-shake bug); a constant height means
+          scroll-driven state can never trigger layout work, only paint-free
+          compositor changes (opacity/background-color) above. */}
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 gap-4 py-3">
         {/* LOGO */}
         <Link
           to="/"
