@@ -4,10 +4,23 @@ import { ArrowUpRight, Boxes } from "lucide-react";
 import { localized } from "../../Shared/utils/localize";
 import { onImgError } from "../../Shared/utils/imageFallback";
 
+// Minimum total (duplicated) cards to render, so the track is guaranteed wider
+// than any realistic viewport — a store with only 1-3 categories would
+// otherwise render a track narrower than the screen, which doesn't overflow
+// and so just sits flush to one side with a dead gap instead of looping.
+const MIN_LOOP_CARDS = 12;
+
 // Auto-scrolling category banner: a slow, infinite marquee of category cards.
-// The list is rendered TWICE so the CSS translateX(-50%) loops seamlessly (see
-// .marquee-track in index.css). Hovering pauses it; reduced-motion users get a
-// static row. Duration scales with the card count so the pixel speed stays even.
+// The list is repeated enough times to comfortably exceed the viewport width
+// (see MIN_LOOP_CARDS above), then the CSS animation shifts the track by
+// EXACTLY one repeat-unit's rendered width (a generalized version of the
+// classic "duplicate + translateX(-50%)" loop trick that works for any repeat
+// count — see --marquee-repeat / marquee-x in index.css) so it loops
+// seamlessly regardless of how many categories the store has. The scroll
+// direction mirrors per language: it moves opposite to the reading direction
+// (right-to-left in LTR, left-to-right in RTL) — the standard ticker
+// convention, kept consistent across languages. Hovering pauses it;
+// reduced-motion users get a static row.
 export default function CategoryMarquee({ categories = [], loading = false }) {
   const { t, i18n } = useTranslation();
 
@@ -24,7 +37,9 @@ export default function CategoryMarquee({ categories = [], loading = false }) {
   if (!categories.length) return null;
 
   const duration = Math.max(30, categories.length * 5); // ~5s per card, min 30s
-  const loop = [...categories, ...categories]; // duplicated for a seamless loop
+  const isRTL = i18n.dir?.() === "rtl";
+  const repeat = Math.max(2, Math.ceil(MIN_LOOP_CARDS / categories.length));
+  const loop = Array.from({ length: repeat }, () => categories).flat();
 
   const Card = ({ cat, ghost }) => {
     const img = cat.image?.url;
@@ -83,7 +98,14 @@ export default function CategoryMarquee({ categories = [], loading = false }) {
         WebkitMaskImage: "linear-gradient(to right, transparent, #000 5%, #000 95%, transparent)",
       }}
     >
-      <div className="marquee-track py-2" style={{ "--marquee-duration": `${duration}s` }}>
+      <div
+        className="marquee-track py-2"
+        style={{
+          "--marquee-duration": `${duration}s`,
+          "--marquee-repeat": repeat,
+          "--marquee-dir": isRTL ? 1 : -1,
+        }}
+      >
         {loop.map((cat, i) => (
           <Card key={`${cat._id}-${i}`} cat={cat} ghost={i >= categories.length} />
         ))}

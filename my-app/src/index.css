@@ -165,12 +165,22 @@ body {
   to { transform: translateX(60%); }
 }
 
-/* Slow infinite category banner. The card list is rendered twice; translating
-   the track by exactly one copy (-50% minus half the 1.25rem gap) loops it
-   seamlessly. Hover pauses; reduced-motion users get a static row. */
+/* Slow infinite category banner. The card list is repeated `--marquee-repeat`
+   times (see CategoryMarquee.jsx — enough to always exceed the viewport
+   width, however few categories the store has); translating the track by
+   exactly one repeat-unit's rendered width — (100% + one gap) / repeat —
+   loops it seamlessly for ANY repeat count (the classic "duplicate +
+   translateX(-50%)" trick generalized: at repeat=2 this reduces to the
+   original -50% - 0.625rem). --marquee-dir flips the sign so the ticker
+   moves opposite to the reading direction in both LTR and RTL. Hover pauses;
+   reduced-motion users get a static row. */
 @keyframes marquee-x {
   from { transform: translateX(0); }
-  to { transform: translateX(calc(-50% - 0.625rem)); }
+  to {
+    transform: translateX(calc(
+      var(--marquee-dir, -1) * (100% + 1.25rem) / var(--marquee-repeat, 2)
+    ));
+  }
 }
 .marquee-track {
   display: flex;
