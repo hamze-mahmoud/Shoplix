@@ -5,8 +5,10 @@ import { toastService } from "../../../Shared/services/toastService";
 
 import { useCart } from "../../context/CartContext";
 import { orderService } from "../../../Shared/services/orderService";
+import { computeDelivery } from "../../../Shared/utils/shipping";
 import PaymentMethod from "./PaymentMethod";
 import OrderReview from "./OrderReview";
+import DeliveryFeeConfirm from "./DeliveryFeeConfirm";
 
 export default function CheckoutPage() {
   const { t, i18n } = useTranslation();
@@ -18,14 +20,28 @@ export default function CheckoutPage() {
   });
   const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
   const [loading, setLoading] = useState(false);
+  // Delivery-fee confirmation step: opens after "Place order" so the customer
+  // acknowledges the fee is an estimate we'll confirm by WhatsApp/call.
+  const [showDeliveryConfirm, setShowDeliveryConfirm] = useState(false);
 
-  const handlePlaceOrder = async () => {
+  const hasRegion = !!shippingAddress.region;
+  const estimatedDelivery = hasRegion
+    ? computeDelivery(cart?.items || [], shippingAddress.region)
+    : 0;
+
+  // Step 1 — validate the address, then open the delivery-fee confirmation step
+  // instead of placing the order straight away.
+  const handlePlaceOrder = () => {
     const { region, city, description, phone } = shippingAddress;
     if (!region || !city || !description || !phone) {
       toastService.warning(t("checkout.fill_address"));
       return;
     }
+    setShowDeliveryConfirm(true);
+  };
 
+  // Step 2 — the customer confirmed; actually create the order.
+  const handleConfirmOrder = async () => {
     try {
       setLoading(true);
       // Record the language the customer ordered in so confirmations (e.g. the
@@ -35,6 +51,7 @@ export default function CheckoutPage() {
       // The server emptied the cart with the order — refresh local state so the
       // navbar badge and cart page clear immediately.
       await fetchCart();
+      setShowDeliveryConfirm(false);
       toastService.success(t("checkout.order_placed"));
       navigate("/orders");
     } catch (err) {
@@ -73,6 +90,16 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Delivery-fee confirmation step */}
+      <DeliveryFeeConfirm
+        isOpen={showDeliveryConfirm}
+        onClose={() => !loading && setShowDeliveryConfirm(false)}
+        onConfirm={handleConfirmOrder}
+        loading={loading}
+        deliveryFee={estimatedDelivery}
+        hasRegion={hasRegion}
+      />
     </div>
   );
 }

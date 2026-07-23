@@ -1,4 +1,4 @@
-import { ShieldCheck, Truck, Wallet, Loader2 } from "lucide-react";
+import { ShieldCheck, Truck, Wallet, Loader2, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { localized } from "../../../Shared/utils/localize";
 import { onImgError } from "../../../Shared/utils/imageFallback";
@@ -70,14 +70,20 @@ export default function OrderReview({ cart, shippingAddress, onPlaceOrder, loadi
           <span className="font-medium">{formatPrice(itemsTotal)}</span>
         </div>
         <div className="flex justify-between text-sm text-gray-600">
-          <span>{t("cart.shipping")}</span>
-          <span className={hasRegion ? "font-medium" : "text-gray-400"}>
-            {hasRegion ? formatPrice(shippingCost) : t("checkout.select_region")}
+          <span>{t("checkout.est_delivery", "Estimated delivery")}</span>
+          <span dir="ltr" className={hasRegion ? "font-medium text-start" : "text-gray-400"}>
+            {hasRegion ? `≈ ${formatPrice(shippingCost)}` : t("checkout.select_region")}
           </span>
         </div>
+        {hasRegion && (
+          <p className="flex items-start gap-1.5 text-[11px] text-gray-400 -mt-1">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-px" />
+            {t("checkout.est_delivery_hint", "Estimate — we confirm the final delivery fee within 1–2h.")}
+          </p>
+        )}
         <div className="border-t border-gray-200 pt-3 flex justify-between font-black text-lg">
           <span>{t("checkout.grand_total")}</span>
-          <span className="text-green-600">{formatPrice(grandTotal)}</span>
+          <span className="text-green-600">≈ {formatPrice(grandTotal)}</span>
         </div>
 
         {/* Trust signals */}
