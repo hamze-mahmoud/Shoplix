@@ -80,12 +80,32 @@ export default function Navbar() {
   };
 
   // Scroll condense + shadow; tuck the promo strip away once browsing.
+  //
+  // The promo collapse uses HYSTERESIS (collapse past 140px, re-show under
+  // 70px) instead of a single 80px threshold. Collapsing the promo shortens
+  // the header, which nudges scrollY back down; with one threshold that would
+  // immediately re-expand it and oscillate — the header would visibly SHAKE
+  // near the boundary. The 70–140 dead zone breaks that feedback loop. The
+  // handler runs inside requestAnimationFrame so it never fights the browser's
+  // own scroll frame.
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 10);
-      setHidePromo(window.scrollY > 80);
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      setHidePromo((prev) => {
+        if (!prev && y > 140) return true;
+        if (prev && y < 70) return false;
+        return prev;
+      });
     };
-    onScroll();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+    apply();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
