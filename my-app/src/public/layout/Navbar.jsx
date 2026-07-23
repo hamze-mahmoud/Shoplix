@@ -81,22 +81,28 @@ export default function Navbar() {
 
   // Scroll condense + shadow; tuck the promo strip away once browsing.
   //
-  // The promo collapse uses HYSTERESIS (collapse past 140px, re-show under
-  // 70px) instead of a single 80px threshold. Collapsing the promo shortens
-  // the header, which nudges scrollY back down; with one threshold that would
-  // immediately re-expand it and oscillate — the header would visibly SHAKE
-  // near the boundary. The 70–140 dead zone breaks that feedback loop. The
-  // handler runs inside requestAnimationFrame so it never fights the browser's
-  // own scroll frame.
+  // BOTH state changes shift the header's own height — `scrolled` swaps the
+  // padding (py-4 → py-2.5, ~12px) and toggles the border/shadow; `hidePromo`
+  // removes the ~40px promo strip. A shorter header nudges scrollY back down,
+  // so a SINGLE threshold immediately flips the state back and oscillates —
+  // the border line and shadow flicker on/off and the bar visibly shakes.
+  // Each state therefore uses HYSTERESIS: a dead zone (wider than the height
+  // it moves) between the "turn on" and "turn off" points, so it flips at most
+  // once per crossing and never feeds back. Runs inside requestAnimationFrame
+  // so it doesn't fight the browser's own scroll frame.
   useEffect(() => {
     let ticking = false;
     const apply = () => {
       ticking = false;
       const y = window.scrollY;
-      setScrolled(y > 24);
+      setScrolled((prev) => {
+        if (!prev && y > 60) return true;
+        if (prev && y < 20) return false;
+        return prev;
+      });
       setHidePromo((prev) => {
-        if (!prev && y > 140) return true;
-        if (prev && y < 70) return false;
+        if (!prev && y > 160) return true;
+        if (prev && y < 80) return false;
         return prev;
       });
     };
