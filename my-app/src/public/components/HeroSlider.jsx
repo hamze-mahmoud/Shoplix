@@ -49,11 +49,17 @@ export default function HeroSlider({ slides = [], interval = 6000 }) {
               flowing underneath it (which pushed the text out of view) */}
           <img src={s.img} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#111827]/85 via-[#111827]/45 to-transparent" />
+          {/* Mobile-only even darkening: on desktop the text sits in the left
+              half, so the directional gradient above is enough contrast. On
+              mobile the text is centered across the FULL width (below), so it
+              needs even contrast against whatever part of the photo is behind
+              it, not just the left edge. */}
+          <div className="absolute inset-0 bg-black/30 sm:hidden" />
 
           <div className="relative z-10 h-full min-h-[88vh] flex items-center">
             <div className="max-w-7xl mx-auto px-6 sm:px-10 w-full">
               <div
-                className={`max-w-2xl text-white transition-all duration-700 ${
+                className={`max-w-2xl mx-auto sm:mx-0 text-center sm:text-start text-white transition-all duration-700 ${
                   i === active ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
                 }`}
               >
@@ -65,9 +71,9 @@ export default function HeroSlider({ slides = [], interval = 6000 }) {
                   {s.title2 && <span className="block italic text-[#FACC15]/90">{s.title2}</span>}
                 </h1>
                 {s.sub && (
-                  <p className="mt-7 text-base sm:text-lg text-white/80 max-w-md leading-relaxed font-light">{s.sub}</p>
+                  <p className="mt-7 text-base sm:text-lg text-white/80 max-w-md mx-auto sm:mx-0 leading-relaxed font-light">{s.sub}</p>
                 )}
-                <div className="mt-10">
+                <div className="mt-10 flex justify-center sm:justify-start">
                   <Link
                     to={s.to || "/products"}
                     className="btn-press group inline-flex items-center gap-3 bg-white text-[#111827] px-8 py-4 text-sm uppercase tracking-[0.15em] font-medium hover:bg-yellow-400 transition-colors"
