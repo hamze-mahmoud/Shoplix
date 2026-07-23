@@ -90,13 +90,13 @@ export default function ProductGallery({ product }) {
               onClick={(e) => { e.stopPropagation(); prevImage(); }}
               className="absolute start-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#111827] text-white flex items-center justify-center hover:bg-green-500 shadow-md transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); nextImage(); }}
               className="absolute end-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#111827] text-white flex items-center justify-center hover:bg-green-500 shadow-md transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 rtl:rotate-180" />
             </button>
           </>
         )}

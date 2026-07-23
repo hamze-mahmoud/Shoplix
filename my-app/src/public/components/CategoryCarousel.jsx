@@ -50,12 +50,18 @@ export default function CategoryCarousel({ categories = [], images = [], loading
     };
   }, [syncScroll, categories.length]);
 
+  // `dir` is semantic: -1 = toward previous cards, +1 = toward next cards —
+  // always in READING order, regardless of language. Modern browsers run
+  // scrollLeft NEGATIVE toward "next" under dir=rtl (opposite of LTR), so
+  // the sign must be flipped in RTL or the arrows scroll backwards in
+  // Arabic/Hebrew even though their icons point the right way.
   const scrollByCards = (dir) => {
     const rail = railRef.current;
     if (!rail) return;
     const card = rail.querySelector("[data-cat-card]");
     const amount = card ? card.offsetWidth + 20 : 320;
-    rail.scrollBy({ left: dir * amount, behavior: "smooth" });
+    const isRTL = i18n.dir?.() === "rtl";
+    rail.scrollBy({ left: (isRTL ? -dir : dir) * amount, behavior: "smooth" });
   };
 
   // ---- drag to scroll ----

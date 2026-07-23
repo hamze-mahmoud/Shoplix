@@ -54,12 +54,19 @@ export default function ProductCarousel({ products = [], showSold = false }) {
   const { t, i18n } = useTranslation();
   const railRef = useRef(null);
 
+  // `dir` is semantic: -1 = toward previous items, +1 = toward next items —
+  // always in READING order, regardless of language. Modern browsers run
+  // scrollLeft NEGATIVE toward "next" under dir=rtl (the opposite sign
+  // convention from LTR), so the sign must be flipped in RTL or the arrows
+  // scroll backwards in Arabic/Hebrew even though their icons point the
+  // right way.
   const scrollByCards = (dir) => {
     const rail = railRef.current;
     if (!rail) return;
     const card = rail.querySelector("[data-card]");
     const amount = card ? card.offsetWidth + 20 : 320;
-    rail.scrollBy({ left: dir * amount, behavior: "smooth" });
+    const isRTL = i18n.dir?.() === "rtl";
+    rail.scrollBy({ left: (isRTL ? -dir : dir) * amount, behavior: "smooth" });
   };
 
   // GSAP staggered reveal — robust to reduced-motion / hidden tab
